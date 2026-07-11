@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>营养计算器</title>
+    <style>
+        /* ===== 全局重置与基础样式 ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+                         "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 24px 16px;
+            color: #2d3436;
+        }
+
+        /* ===== 主容器 ===== */
+        .container {
+            max-width: 720px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* ===== 标题 ===== */
+        .app-title {
+            text-align: center;
+            margin-bottom: 28px;
+            animation: fadeInDown 0.6s ease-out;
+        }
+
+        .app-title h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #2d3436;
+            letter-spacing: 1px;
+        }
+
+        .app-title p {
+            font-size: 14px;
+            color: #636e72;
+            margin-top: 6px;
+        }
+
+        /* ===== 卡片通用 ===== */
+        .card {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(8px);
+            border-radius: 16px;
+            padding: 24px 28px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+            margin-bottom: 20px;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+        }
+
+        /* ===== 输入卡片 ===== */
+        .input-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px 20px;
+        }
+
+        .input-group .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .field label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #636e72;
+            margin-bottom: 6px;
+            letter-spacing: 0.3px;
+        }
+
+        .field input,
+        .field select {
+            padding: 10px 14px;
+            border: 2px solid #dfe6e9;
+            border-radius: 10px;
+            font-size: 15px;
+            font-family: inherit;
+            color: #2d3436;
+            background: #fff;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .field input:focus,
+        .field select:focus {
+            border-color: #6c5ce7;
+            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.15);
+        }
+
+        .field select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23636e72' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 32px;
+        }
+
+        /* ===== 按钮 ===== */
+        .btn-calculate {
+            grid-column: 1 / -1;
+            padding: 14px 0;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            color: #fff;
+            font-size: 17px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            letter-spacing: 1px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            margin-top: 4px;
+        }
+
+        .btn-calculate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(108, 92, 231, 0.35);
+        }
+
+        .btn-calculate:active {
+            transform: translateY(0);
+        }
+
+        /* ===== 结果卡片 ===== */
+        .result-card {
+            display: none;
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        .result-card.visible {
+            display: block;
+        }
+
+        /* ===== 结果指标网格 ===== */
+        .metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .metric-item {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            transition: background 0.2s ease;
+        }
+
+        .metric-item:hover {
+            background: #f0f1f3;
+        }
+
+        .metric-item .label {
+            font-size: 12px;
+            color: #636e72;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        .metric-item .value {
+            font-size: 26px;
+            font-weight: 700;
+            color: #2d3436;
+            margin: 4px 0 2px;
+        }
+
+        .metric-item .sub {
+            font-size: 13px;
+            color: #636e72;
+        }
+
+        /* 不同评价的颜色 */
+        .evaluation-underweight { color: #fdcb6e; }
+        .evaluation-normal     { color: #00b894; }
+        .evaluation-overweight { color: #e17055; }
+        .evaluation-obese      { color: #d63031; }
+
+        /* ===== 宏量营养素表格 ===== */
+        .macro-section h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2d3436;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .macro-section h3::before {
+            content: "";
+            display: inline-block;
+            width: 4px;
+            height: 18px;
+            background: #6c5ce7;
+            border-radius: 2px;
+        }
+
+        .macro-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .macro-table th {
+            text-align: left;
+            padding: 10px 8px 8px;
+            font-weight: 600;
+            color: #636e72;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #dfe6e9;
+        }
+
+        .macro-table td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #f0f1f3;
+        }
+
+        .macro-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .macro-table .nutrient-name {
+            font-weight: 600;
+            color: #2d3436;
+        }
+
+        .macro-table .nutrient-range {
+            color: #6c5ce7;
+            font-weight: 600;
+        }
+
+        .macro-table .nutrient-ratio {
+            color: #636e72;
+        }
+
+        /* 供能比色块 */
+        .ratio-bar {
+            display: inline-block;
+            height: 8px;
+            border-radius: 4px;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+
+        .ratio-bar.carbs  { background: #fdcb6e; }
+        .ratio-bar.protein { background: #6c5ce7; }
+        .ratio-bar.fat    { background: #e17055; }
+
+        /* ===== 建议区域 ===== */
+        .advice-box {
+            background: linear-gradient(135deg, #dfe6e9, #f0f1f3);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-top: 16px;
+            font-size: 14px;
+            line-height: 1.7;
+            color: #2d3436;
+            border-left: 4px solid #6c5ce7;
+        }
+
+        /* ===== 折叠公式说明 ===== */
+        .formula-details {
+            cursor: pointer;
+        }
+
+        .formula-details[open] {
+            cursor: default;
+        }
+
+        .formula-summary {
+            font-size: 15px;
+            font-weight: 600;
+            color: #6c5ce7;
+            padding: 4px 0;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .formula-summary::-webkit-details-marker {
+            color: #6c5ce7;
+        }
+
+        .formula-content {
+            margin-top: 16px;
+            font-size: 14px;
+            line-height: 1.8;
+            color: #2d3436;
+        }
+
+        .formula-content h4 {
+            font-size: 14px;
+            font-weight: 600;
+            margin: 16px 0 8px;
+            color: #2d3436;
+        }
+
+        .formula-content h4:first-of-type {
+            margin-top: 0;
+        }
+
+        .formula-content ul {
+            padding-left: 20px;
+            margin: 8px 0;
+        }
+
+        .formula-content li {
+            margin-bottom: 6px;
+        }
+
+        .formula-block {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin: 12px 0;
+        }
+
+        .formula-row {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            padding: 6px 0;
+        }
+
+        .formula-row + .formula-row {
+            border-top: 1px solid #eee;
+        }
+
+        .formula-label {
+            font-weight: 600;
+            color: #6c5ce7;
+            min-width: 72px;
+            font-size: 13px;
+        }
+
+        .formula-expr {
+            font-family: "Courier New", Consolas, monospace;
+            font-size: 15px;
+            color: #2d3436;
+            letter-spacing: 0.5px;
+        }
+
+        /* ===== 历史记录 ===== */
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+
+        .history-header h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2d3436;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .history-header h3::before {
+            content: "";
+            display: inline-block;
+            width: 4px;
+            height: 18px;
+            background: #6c5ce7;
+            border-radius: 2px;
+        }
+
+        .history-count {
+            font-size: 12px;
+            font-weight: 400;
+            color: #636e72;
+            background: #f0f1f3;
+            padding: 2px 10px;
+            border-radius: 10px;
+            margin-left: 6px;
+        }
+
+        .btn-clear-all {
+            padding: 6px 16px;
+            border: none;
+            border-radius: 8px;
+            background: #dfe6e9;
+            color: #636e72;
+            font-size: 12px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .btn-clear-all:hover {
+            background: #e17055;
+            color: #fff;
+        }
+
+        .history-empty {
+            text-align: center;
+            padding: 24px 0;
+            color: #b2bec3;
+            font-size: 14px;
+        }
+
+        .history-list {
+            list-style: none;
+            max-height: 360px;
+            overflow-y: auto;
+        }
+
+        .history-list::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .history-list::-webkit-scrollbar-thumb {
+            background: #dfe6e9;
+            border-radius: 2px;
+        }
+
+        .history-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 14px;
+            border-radius: 10px;
+            background: #f8f9fa;
+            margin-bottom: 8px;
+            transition: background 0.2s ease;
+            cursor: pointer;
+        }
+
+        .history-item:hover {
+            background: #f0f1f3;
+        }
+
+        .history-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .history-item-main {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .history-item-top {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .history-item-time {
+            font-size: 11px;
+            color: #b2bec3;
+        }
+
+        .history-item-bmi {
+            font-weight: 700;
+            font-size: 15px;
+            color: #2d3436;
+        }
+
+        .history-item-eval {
+            font-size: 12px;
+            font-weight: 600;
+            padding: 1px 8px;
+            border-radius: 6px;
+        }
+
+        .history-item-eval.underweight {
+            background: #fef3d5;
+            color: #d68910;
+        }
+
+        .history-item-eval.normal {
+            background: #d5f5e3;
+            color: #1a8a5c;
+        }
+
+        .history-item-eval.overweight {
+            background: #fde8e0;
+            color: #c0392b;
+        }
+
+        .history-item-eval.obese {
+            background: #fadbd8;
+            color: #b03a2e;
+        }
+
+        .history-item-detail {
+            font-size: 12px;
+            color: #636e72;
+            margin-top: 3px;
+        }
+
+        .btn-delete-item {
+            width: 30px;
+            height: 30px;
+            border: none;
+            border-radius: 8px;
+            background: transparent;
+            color: #b2bec3;
+            font-size: 16px;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: background 0.2s ease, color 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-delete-item:hover {
+            background: #fadbd8;
+            color: #d63031;
+        }
+
+        /* ===== 动画关键帧 ===== */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(24px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ===== 移动端适配 ===== */
+        @media (max-width: 540px) {
+            body {
+                padding: 16px 12px;
+            }
+
+            .card {
+                padding: 18px 16px;
+                border-radius: 12px;
+            }
+
+            .app-title h1 {
+                font-size: 22px;
+            }
+
+            .input-group {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .input-group .full-width {
+                grid-column: 1;
+            }
+
+            .metrics {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+
+            .metric-item {
+                padding: 12px 8px;
+            }
+
+            .metric-item .value {
+                font-size: 22px;
+            }
+
+            .macro-table {
+                font-size: 13px;
+            }
+
+            .macro-table th,
+            .macro-table td {
+                padding: 8px 4px;
+            }
+
+            .history-item-top {
+                gap: 6px;
+            }
+
+            .history-item-bmi {
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .metrics {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- 标题 -->
+    <div class="app-title">
+        <h1>营养计算器</h1>
+        <p>科学计算你的身体指标与营养需求</p>
+    </div>
+
+    <!-- 输入卡片 -->
+    <div class="card" id="inputCard">
+        <div class="input-group">
+            <!-- 年龄 -->
+            <div class="field">
+                <label for="age">年龄（岁）</label>
+                <input type="number" id="age" min="1" max="120" placeholder="例如 25" value="25">
+            </div>
+            <!-- 性别 -->
+            <div class="field">
+                <label for="gender">性别</label>
+                <select id="gender">
+                    <option value="male">男</option>
+                    <option value="female" selected>女</option>
+                </select>
+            </div>
+            <!-- 身高 -->
+            <div class="field">
+                <label for="height">身高（cm）</label>
+                <input type="number" id="height" min="50" max="250" step="0.1" placeholder="例如 170" value="165">
+            </div>
+            <!-- 体重 -->
+            <div class="field">
+                <label for="weight">体重（kg）</label>
+                <input type="number" id="weight" min="10" max="300" step="0.1" placeholder="例如 60" value="60">
+            </div>
+            <!-- 活动水平（全宽） -->
+            <div class="field full-width">
+                <label for="activity">活动水平</label>
+                <select id="activity">
+                    <option value="1.2">几乎不动 — 久坐办公，很少运动</option>
+                    <option value="1.375" selected>轻度活动 — 每周运动 1-3 天</option>
+                    <option value="1.55">中度活动 — 每周运动 3-5 天</option>
+                    <option value="1.725">非常活跃 — 每周运动 6-7 天或体力劳动</option>
+                </select>
+            </div>
+            <!-- 计算按钮 -->
+            <button class="btn-calculate" id="calcBtn">计算我的指标</button>
+        </div>
+    </div>
+
+    <!-- 结果卡片 -->
+    <div class="card result-card" id="resultCard">
+        <!-- 核心指标 -->
+        <div class="metrics">
+            <div class="metric-item">
+                <div class="label">BMI</div>
+                <div class="value" id="bmiValue">—</div>
+                <div class="sub" id="bmiEval">—</div>
+            </div>
+            <div class="metric-item">
+                <div class="label">基础代谢率 (BMR)</div>
+                <div class="value" id="bmrValue">—</div>
+                <div class="sub">千卡 / 天</div>
+            </div>
+            <div class="metric-item">
+                <div class="label">每日总能耗 (TDEE)</div>
+                <div class="value" id="tdeeValue">—</div>
+                <div class="sub">千卡 / 天</div>
+            </div>
+            <div class="metric-item">
+                <div class="label">体重评价</div>
+                <div class="value" id="weightEval">—</div>
+                <div class="sub" id="weightEvalSub">—</div>
+            </div>
+        </div>
+
+        <!-- 宏量营养素 -->
+        <div class="macro-section">
+            <h3>每日营养素建议摄入范围</h3>
+            <table class="macro-table">
+                <thead>
+                    <tr>
+                        <th>营养素</th>
+                        <th>建议摄入量（克）</th>
+                        <th>供能比</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="nutrient-name">
+                            <span class="ratio-bar carbs"></span>碳水化合物
+                        </td>
+                        <td class="nutrient-range" id="carbsRange">—</td>
+                        <td class="nutrient-ratio" id="carbsRatio">—</td>
+                    </tr>
+                    <tr>
+                        <td class="nutrient-name">
+                            <span class="ratio-bar protein"></span>蛋白质
+                        </td>
+                        <td class="nutrient-range" id="proteinRange">—</td>
+                        <td class="nutrient-ratio" id="proteinRatio">—</td>
+                    </tr>
+                    <tr>
+                        <td class="nutrient-name">
+                            <span class="ratio-bar fat"></span>脂肪
+                        </td>
+                        <td class="nutrient-range" id="fatRange">—</td>
+                        <td class="nutrient-ratio" id="fatRatio">—</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 建议 -->
+        <div class="advice-box" id="adviceBox"></div>
+    </div>
+
+    <!-- 公式说明（折叠） -->
+    <details class="card formula-details">
+        <summary class="formula-summary">Mifflin-St Jeor 公式原理</summary>
+        <div class="formula-content">
+            <p><strong>Mifflin-St Jeor</strong> 是目前公认估算基础代谢率（BMR）最准确的公式之一，于 1990 年由 Mifflin 和 St Jeor 等人发表。它通过体重、身高、年龄和性别来预测人体在静息状态下维持生命所需的最低能量消耗。</p>
+
+            <div class="formula-block">
+                <div class="formula-row">
+                    <span class="formula-label">男性 BMR</span>
+                    <span class="formula-expr">10 × 体重(kg) + 6.25 × 身高(cm) − 5 × 年龄 + 5</span>
+                </div>
+                <div class="formula-row">
+                    <span class="formula-label">女性 BMR</span>
+                    <span class="formula-expr">10 × 体重(kg) + 6.25 × 身高(cm) − 5 × 年龄 − 161</span>
+                </div>
+            </div>
+
+            <h4>各系数含义</h4>
+            <ul>
+                <li><strong>体重系数 (10 × kg)</strong> — 反映肌肉和脂肪组织的代谢需求。肌肉组织的代谢活性远高于脂肪，每公斤体重每天约消耗 10 千卡。</li>
+                <li><strong>身高系数 (6.25 × cm)</strong> — 身高与体表面积正相关，体表面积越大，热量散失越多，所需能量也越多。</li>
+                <li><strong>年龄系数 (−5 × 岁)</strong> — 随着年龄增长，肌肉量自然减少，代谢率逐年下降。公式中每增长一岁，BMR 减少 5 千卡。</li>
+                <li><strong>性别常数</strong> — 男性 +5，女性 −161。男性通常拥有更高的肌肉比例和更低的体脂率，因此基础代谢高于女性约 160-200 千卡/天。</li>
+            </ul>
+
+            <h4>与 Harris-Benedict 公式的比较</h4>
+            <p>旧版的 Harris-Benedict 公式（1919 年发布）在现代人群中容易高估 BMR 约 5-15%。Mifflin-St Jeor 公式基于更现代的样本（1980-1990 年代人群），预测误差更小，因此被美国饮食协会（ADA）等权威机构推荐为临床首选公式。</p>
+
+            <h4>TDEE 与活动系数</h4>
+            <p>每日总能量消耗（TDEE）= BMR × 活动系数：</p>
+            <table class="macro-table" style="margin-top:6px;">
+                <thead>
+                    <tr><th>活动水平</th><th>系数</th><th>典型场景</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>几乎不动</td><td>1.2</td><td>久坐办公，很少或没有运动</td></tr>
+                    <tr><td>轻度活动</td><td>1.375</td><td>每周运动 1-3 天</td></tr>
+                    <tr><td>中度活动</td><td>1.55</td><td>每周运动 3-5 天</td></tr>
+                    <tr><td>非常活跃</td><td>1.725</td><td>每周运动 6-7 天或体力劳动</td></tr>
+                </tbody>
+            </table>
+            <p style="margin-top:10px;font-size:13px;color:#636e72;">注：以上系数是估算值，实际能量消耗因个体差异（肌肉量、激素水平、遗传等）而有所不同。</p>
+        </div>
+    </details>
+
+    <!-- 历史记录 -->
+    <div class="card" id="historyCard">
+        <div class="history-header">
+            <h3>历史记录 <span class="history-count" id="historyCount">0</span></h3>
+            <button class="btn-clear-all" id="clearAllBtn">清空全部</button>
+        </div>
+        <div id="historyContainer">
+            <div class="history-empty" id="historyEmpty">暂无记录，计算后自动保存</div>
+            <ul class="history-list" id="historyList"></ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    /**
+     * ===== 营养计算器 — 核心计算逻辑 =====
+     *
+     * 公式说明：
+     *   BMI          = 体重(kg) / (身高(m))²
+     *   BMR (男)     = 10 × 体重(kg) + 6.25 × 身高(cm) - 5 × 年龄 + 5
+     *   BMR (女)     = 10 × 体重(kg) + 6.25 × 身高(cm) - 5 × 年龄 - 161
+     *   TDEE         = BMR × 活动系数
+     *   碳水供能比   = 45% ~ 65%
+     *   蛋白质供能比 = 10% ~ 35%
+     *   脂肪供能比   = 20% ~ 35%
+     *   1g 碳水 = 4 kcal，1g 蛋白质 = 4 kcal，1g 脂肪 = 9 kcal
+     */
+
+    (function() {
+        // ===== DOM 引用 =====
+        const ageInput     = document.getElementById('age');
+        const genderSelect = document.getElementById('gender');
+        const heightInput  = document.getElementById('height');
+        const weightInput  = document.getElementById('weight');
+        const activitySelect = document.getElementById('activity');
+        const calcBtn      = document.getElementById('calcBtn');
+        const resultCard   = document.getElementById('resultCard');
+
+        const bmiValueEl   = document.getElementById('bmiValue');
+        const bmiEvalEl    = document.getElementById('bmiEval');
+        const bmrValueEl   = document.getElementById('bmrValue');
+        const tdeeValueEl  = document.getElementById('tdeeValue');
+        const weightEvalEl = document.getElementById('weightEval');
+        const weightEvalSubEl = document.getElementById('weightEvalSub');
+
+        const carbsRangeEl   = document.getElementById('carbsRange');
+        const proteinRangeEl = document.getElementById('proteinRange');
+        const fatRangeEl     = document.getElementById('fatRange');
+        const carbsRatioEl   = document.getElementById('carbsRatio');
+        const proteinRatioEl = document.getElementById('proteinRatio');
+        const fatRatioEl     = document.getElementById('fatRatio');
+        const adviceBoxEl    = document.getElementById('adviceBox');
+
+        const historyList   = document.getElementById('historyList');
+        const historyEmpty  = document.getElementById('historyEmpty');
+        const historyCount  = document.getElementById('historyCount');
+        const clearAllBtn   = document.getElementById('clearAllBtn');
+
+        // localStorage 键名
+        const STORAGE_KEY = 'nutrition_calculator_history';
+
+        // 活动水平中文标签
+        const ACTIVITY_LABELS = {
+            '1.2':   '几乎不动',
+            '1.375': '轻度活动',
+            '1.55':  '中度活动',
+            '1.725': '非常活跃'
+        };
+
+        // ===== 核心计算 =====
+        function calculate(age, gender, height, weight, activityFactor) {
+            const heightM = height / 100;
+            const bmi = weight / (heightM * heightM);
+
+            let bmiEval, weightEval, weightEvalSub;
+            if (bmi < 18.5) {
+                bmiEval = '偏瘦';
+                weightEval = '偏瘦';
+                weightEvalSub = '建议适当增加营养摄入';
+            } else if (bmi < 24) {
+                bmiEval = '正常';
+                weightEval = '正常';
+                weightEvalSub = '继续保持良好的生活习惯';
+            } else if (bmi < 28) {
+                bmiEval = '超重';
+                weightEval = '超重';
+                weightEvalSub = '建议控制饮食并增加运动';
+            } else {
+                bmiEval = '肥胖';
+                weightEval = '肥胖';
+                weightEvalSub = '建议咨询专业人士制定减重计划';
+            }
+
+            let bmr;
+            if (gender === 'male') {
+                bmr = 10 * weight + 6.25 * height - 5 * age + 5;
+            } else {
+                bmr = 10 * weight + 6.25 * height - 5 * age - 161;
+            }
+
+            const tdee = bmr * activityFactor;
+
+            const carbsRatioLow   = 0.45;
+            const carbsRatioHigh  = 0.65;
+            const proteinRatioLow = 0.10;
+            const proteinRatioHigh= 0.35;
+            const fatRatioLow     = 0.20;
+            const fatRatioHigh    = 0.35;
+
+            const carbsGramLow    = (tdee * carbsRatioLow)   / 4;
+            const carbsGramHigh   = (tdee * carbsRatioHigh)  / 4;
+            const proteinGramLow  = (tdee * proteinRatioLow) / 4;
+            const proteinGramHigh = (tdee * proteinRatioHigh)/ 4;
+            const fatGramLow      = (tdee * fatRatioLow)     / 9;
+            const fatGramHigh     = (tdee * fatRatioHigh)    / 9;
+
+            return {
+                bmi: Math.round(bmi * 10) / 10,
+                bmiEval,
+                weightEval,
+                weightEvalSub,
+                bmr: Math.round(bmr),
+                tdee: Math.round(tdee),
+                carbsRange:   [Math.round(carbsGramLow),   Math.round(carbsGramHigh)],
+                proteinRange: [Math.round(proteinGramLow), Math.round(proteinGramHigh)],
+                fatRange:     [Math.round(fatGramLow),     Math.round(fatGramHigh)],
+                carbsRatio:   [carbsRatioLow * 100,   carbsRatioHigh * 100],
+                proteinRatio: [proteinRatioLow * 100, proteinRatioHigh * 100],
+                fatRatio:     [fatRatioLow * 100,     fatRatioHigh * 100]
+            };
+        }
+
+        function getAdvice(evalText) {
+            switch (evalText) {
+                case '偏瘦':
+                    return '你的 BMI 偏低。建议增加优质蛋白质和健康脂肪摄入（如鸡蛋、鱼肉、坚果），'
+                         + '并结合力量训练增加肌肉量。少食多餐有助于提升总热量摄入。';
+                case '正常':
+                    return '你的 BMI 在理想范围内！建议保持均衡饮食（碳水 45-65%、蛋白质 10-35%、脂肪 20-35%），'
+                         + '每周进行 150 分钟以上中等强度有氧运动，同时配合力量训练维持肌肉量。';
+                case '超重':
+                    return '你的 BMI 偏高。建议适当控制总热量摄入（每日减少 300-500 千卡），'
+                         + '增加蔬菜和膳食纤维比例，减少精制碳水和添加糖。每周运动 4-5 次，'
+                         + '结合有氧与力量训练效果更佳。';
+                case '肥胖':
+                    return '你的 BMI 已达到肥胖范围，建议咨询医生或注册营养师制定个性化方案。'
+                         + '逐步调整饮食结构，优先选择全谷物、瘦肉蛋白和大量蔬菜，'
+                         + '每天坚持 30 分钟以上中等强度运动，从低强度开始循序渐进。';
+                default:
+                    return '';
+            }
+        }
+
+        function formatRange(low, high) {
+            return low + ' ~ ' + high;
+        }
+
+        function formatPercentRange(low, high) {
+            return low + '% ~ ' + high + '%';
+        }
+
+        // ===== 历史记录管理 =====
+
+        /** 读取 localStorage 中的历史记录 */
+        function loadHistory() {
+            try {
+                const data = localStorage.getItem(STORAGE_KEY);
+                return data ? JSON.parse(data) : [];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        /** 写入 localStorage */
+        function saveHistory(records) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+        }
+
+        /** 获取评价对应的 CSS 类名 */
+        function evalClass(evalText) {
+            switch (evalText) {
+                case '偏瘦': return 'underweight';
+                case '正常': return 'normal';
+                case '超重': return 'overweight';
+                case '肥胖': return 'obese';
+                default: return '';
+            }
+        }
+
+        /** 渲染历史列表 */
+        function renderHistory() {
+            const records = loadHistory();
+
+            // 更新计数
+            historyCount.textContent = records.length;
+
+            if (records.length === 0) {
+                historyEmpty.style.display = 'block';
+                historyList.innerHTML = '';
+                return;
+            }
+
+            historyEmpty.style.display = 'none';
+
+            // 倒序显示（最新的在前）
+            const html = records.slice().reverse().map(function(rec, idx) {
+                // idx 在 reversed 数组中的原始索引
+                const realIndex = records.length - 1 - idx;
+                // 格式化时间
+                const timeStr = new Date(rec.timestamp).toLocaleString('zh-CN', {
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                const evalCls = evalClass(rec.bmiEval);
+
+                return '<li class="history-item" data-index="' + realIndex + '">'
+                    + '<div class="history-item-main">'
+                        + '<div class="history-item-top">'
+                            + '<span class="history-item-time">' + timeStr + '</span>'
+                            + '<span class="history-item-bmi">BMI ' + rec.bmi + '</span>'
+                            + '<span class="history-item-eval ' + evalCls + '">' + rec.bmiEval + '</span>'
+                        + '</div>'
+                        + '<div class="history-item-detail">'
+                            + rec.genderLabel + ' · ' + rec.age + '岁 · ' + rec.height + 'cm · ' + rec.weight + 'kg · ' + rec.activityLabel
+                        + '</div>'
+                    + '</div>'
+                    + '<button class="btn-delete-item" data-index="' + realIndex + '" title="删除">✕</button>'
+                + '</li>';
+            }).join('');
+
+            historyList.innerHTML = html;
+        }
+
+        /** 添加一条新记录到历史 */
+        function addHistoryRecord(inputs, result) {
+            const records = loadHistory();
+
+            // 最多保留 50 条，超出则删除最旧的
+            if (records.length >= 50) {
+                records.splice(0, records.length - 49);
+            }
+
+            records.push({
+                timestamp: Date.now(),
+                age: inputs.age,
+                gender: inputs.gender,
+                genderLabel: inputs.gender === 'male' ? '男' : '女',
+                height: inputs.height,
+                weight: inputs.weight,
+                activityLabel: inputs.activityLabel,
+                bmi: result.bmi,
+                bmiEval: result.bmiEval,
+                bmr: result.bmr,
+                tdee: result.tdee
+            });
+
+            saveHistory(records);
+            renderHistory();
+        }
+
+        /** 删除单条记录 */
+        function deleteRecord(index) {
+            const records = loadHistory();
+            if (index >= 0 && index < records.length) {
+                records.splice(index, 1);
+                saveHistory(records);
+                renderHistory();
+            }
+        }
+
+        /** 清空所有记录 */
+        function clearAllRecords() {
+            if (loadHistory().length === 0) return;
+            saveHistory([]);
+            renderHistory();
+        }
+
+        // ===== 界面更新 =====
+
+        function runCalculation() {
+            const age = parseFloat(ageInput.value);
+            const gender = genderSelect.value;
+            const height = parseFloat(heightInput.value);
+            const weight = parseFloat(weightInput.value);
+            const activityFactor = parseFloat(activitySelect.value);
+
+            if (!age || age < 1 || age > 120) {
+                alert('请输入有效的年龄（1-120 岁）');
+                return;
+            }
+            if (!height || height < 50 || height > 250) {
+                alert('请输入有效的身高（50-250 cm）');
+                return;
+            }
+            if (!weight || weight < 10 || weight > 300) {
+                alert('请输入有效的体重（10-300 kg）');
+                return;
+            }
+
+            const result = calculate(age, gender, height, weight, activityFactor);
+
+            // 更新指标
+            bmiValueEl.textContent = result.bmi;
+
+            const evalColorMap = {
+                '偏瘦': 'evaluation-underweight',
+                '正常': 'evaluation-normal',
+                '超重': 'evaluation-overweight',
+                '肥胖': 'evaluation-obese'
+            };
+            const colorClass = evalColorMap[result.bmiEval] || '';
+            bmiEvalEl.textContent = result.bmiEval;
+            bmiEvalEl.className = 'sub ' + colorClass;
+
+            bmrValueEl.textContent = result.bmr;
+            tdeeValueEl.textContent = result.tdee;
+
+            weightEvalEl.textContent = result.weightEval;
+            weightEvalEl.className = 'value ' + colorClass;
+            weightEvalSubEl.textContent = result.weightEvalSub;
+
+            carbsRangeEl.textContent   = formatRange(result.carbsRange[0],   result.carbsRange[1])   + ' g';
+            proteinRangeEl.textContent = formatRange(result.proteinRange[0], result.proteinRange[1]) + ' g';
+            fatRangeEl.textContent     = formatRange(result.fatRange[0],     result.fatRange[1])     + ' g';
+
+            carbsRatioEl.textContent   = formatPercentRange(result.carbsRatio[0],   result.carbsRatio[1]);
+            proteinRatioEl.textContent = formatPercentRange(result.proteinRatio[0], result.proteinRatio[1]);
+            fatRatioEl.textContent     = formatPercentRange(result.fatRatio[0],     result.fatRatio[1]);
+
+            adviceBoxEl.innerHTML = getAdvice(result.bmiEval);
+
+            // 显示结果卡片
+            resultCard.classList.remove('visible');
+            void resultCard.offsetWidth;
+            resultCard.classList.add('visible');
+
+            resultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+            // === 保存到历史记录 ===
+            addHistoryRecord({
+                age: age,
+                gender: gender,
+                height: height,
+                weight: weight,
+                activityLabel: ACTIVITY_LABELS[activityFactor] || '未知'
+            }, result);
+        }
+
+        // ===== 事件绑定 =====
+
+        calcBtn.addEventListener('click', runCalculation);
+
+        const inputs = [ageInput, heightInput, weightInput];
+        inputs.forEach(function(input) {
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    calcBtn.click();
+                }
+            });
+        });
+
+        // 历史列表事件委托：删除按钮 & 点击条目回填
+        historyList.addEventListener('click', function(e) {
+            // 删除按钮
+            if (e.target.classList.contains('btn-delete-item')) {
+                e.stopPropagation();
+                const index = parseInt(e.target.getAttribute('data-index'), 10);
+                deleteRecord(index);
+                return;
+            }
+
+            // 点击条目回填到输入框
+            const item = e.target.closest('.history-item');
+            if (item) {
+                const index = parseInt(item.getAttribute('data-index'), 10);
+                const records = loadHistory();
+                const rec = records[index];
+                if (rec) {
+                    ageInput.value = rec.age;
+                    genderSelect.value = rec.gender;
+                    heightInput.value = rec.height;
+                    weightInput.value = rec.weight;
+                    // 滚动到顶部并自动计算
+                    document.querySelector('.app-title').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    setTimeout(runCalculation, 350);
+                }
+            }
+        });
+
+        // 清空全部
+        clearAllBtn.addEventListener('click', function() {
+            if (loadHistory().length === 0) return;
+            if (confirm('确定要清空所有历史记录吗？')) {
+                clearAllRecords();
+            }
+        });
+
+        // 页面加载后渲染历史并自动计算默认值
+        window.addEventListener('DOMContentLoaded', function() {
+            renderHistory();
+            setTimeout(runCalculation, 300);
+        });
+    })();
+</script>
+
+</body>
+</html>
