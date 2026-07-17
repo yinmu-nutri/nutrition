@@ -18,14 +18,87 @@
                          "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            padding: 24px 16px;
+            padding: 0;
             color: #2d3436;
         }
 
-        /* ===== 主容器 ===== */
+        /* ===== 导航栏 ===== */
+        .nav-bar {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid #e0e4e8;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+
+        .nav-inner {
+            max-width: 720px;
+            margin: 0 auto;
+            display: flex;
+            align-items: stretch;
+            padding: 0 16px;
+        }
+
+        .nav-btn {
+            flex: 1;
+            padding: 14px 12px;
+            border: none;
+            background: transparent;
+            font-family: inherit;
+            font-size: 15px;
+            font-weight: 600;
+            color: #636e72;
+            cursor: pointer;
+            position: relative;
+            transition: color 0.2s ease;
+            letter-spacing: 0.5px;
+            text-align: center;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .nav-btn::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 20%;
+            right: 20%;
+            height: 3px;
+            border-radius: 3px 3px 0 0;
+            background: #6c5ce7;
+            transform: scaleX(0);
+            transition: transform 0.25s ease, left 0.25s ease, right 0.25s ease;
+        }
+
+        .nav-btn.active {
+            color: #6c5ce7;
+        }
+
+        .nav-btn.active::after {
+            transform: scaleX(1);
+            left: 10%;
+            right: 10%;
+        }
+
+        .nav-btn:hover {
+            color: #6c5ce7;
+        }
+
+        /* ===== 标签页内容 ===== */
+        .tab-content {
+            display: none;
+            padding: 24px 16px;
+            max-width: 720px;
+            margin: 0 auto;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeInUp 0.4s ease-out;
+        }
+
+        /* ===== 主容器（旧样式保留作兼容） ===== */
         .container {
             max-width: 720px;
             width: 100%;
@@ -699,6 +772,58 @@
             margin-left: 6px;
         }
 
+        /* ===== 特医食品速查样式 ===== */
+        .fs-filter-bar {
+            display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
+            margin-bottom: 24px; background: #fff; padding: 12px 16px;
+            border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,.08);
+        }
+        .fs-filter-bar label { font-size: 14px; font-weight: 500; color: #636e72; }
+        .fs-filter-bar select {
+            flex: 1; min-width: 160px; padding: 8px 12px; font-size: 14px;
+            border: 2px solid #dfe6e9; border-radius: 8px; background: #fff;
+            color: #2d3436; appearance: auto; cursor: pointer; font-family: inherit;
+            outline: none; transition: border-color 0.2s ease;
+        }
+        .fs-filter-bar select:focus {
+            border-color: #6c5ce7;
+            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.15);
+        }
+        .fs-filter-bar .fs-count {
+            font-size: 13px; color: #636e72; white-space: nowrap;
+            margin-left: auto;
+        }
+        .fs-grid {
+            display: grid; gap: 14px;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        }
+        .fs-card {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(8px);
+            border-radius: 12px; padding: 16px 18px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .fs-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+        }
+        .fs-card h3 {
+            font-size: 15px; font-weight: 600; color: #2d3436;
+            margin-bottom: 10px; line-height: 1.4;
+        }
+        .fs-card .fs-meta { font-size: 13px; color: #636e72; line-height: 1.7; }
+        .fs-card .fs-meta .fs-label { color: #b2bec3; }
+        .fs-card .fs-warning {
+            margin-top: 8px; padding: 6px 10px; border-radius: 6px;
+            background: #fff0f0; color: #c41e3a; font-size: 12px; line-height: 1.5;
+            border-left: 3px solid #c41e3a;
+        }
+        .fs-empty {
+            grid-column: 1 / -1; text-align: center; padding: 48px 16px;
+            color: #b2bec3; font-size: 15px;
+        }
+
         @media (max-width: 540px) {
             .food-table {
                 font-size: 12px;
@@ -754,6 +879,10 @@
         /* ===== 移动端适配 ===== */
         @media (max-width: 540px) {
             body {
+                padding: 0;
+            }
+
+            .tab-content {
                 padding: 16px 12px;
             }
 
@@ -804,6 +933,16 @@
             .history-item-bmi {
                 font-size: 14px;
             }
+
+            .nav-btn {
+                font-size: 14px;
+                padding: 12px 10px;
+            }
+
+            .fs-filter-bar { flex-direction: column; align-items: stretch; }
+            .fs-filter-bar select { width: 100%; }
+            .fs-filter-bar .fs-count { margin-left: 0; text-align: right; }
+            .fs-grid { grid-template-columns: 1fr; }
         }
 
         @media (max-width: 380px) {
@@ -815,7 +954,16 @@
 </head>
 <body>
 
-<div class="container">
+<!-- ===== 导航栏 ===== -->
+<nav class="nav-bar">
+    <div class="nav-inner">
+        <button class="nav-btn active" data-tab="calculator">营养计算器</button>
+        <button class="nav-btn" data-tab="foods">特医食品速查</button>
+    </div>
+</nav>
+
+<!-- ===== 标签页：营养计算器 ===== -->
+<div class="tab-content active" id="tab-calculator">
     <!-- 标题 -->
     <div class="app-title">
         <h1>营养计算器</h1>
@@ -1018,6 +1166,32 @@
             <div class="food-empty" id="foodEmpty">未找到匹配的食物</div>
         </div>
     </details>
+</div>
+
+<!-- ===== 标签页：特医食品速查 ===== -->
+<div class="tab-content" id="tab-foods">
+    <div class="app-title">
+        <h1>特医食品速查</h1>
+        <p>特殊医学用途配方食品数据库</p>
+    </div>
+
+    <div class="fs-filter-bar">
+        <label for="diseaseFilter">适用疾病</label>
+        <select id="diseaseFilter">
+            <option value="全部">全部</option>
+            <option value="术后">术后</option>
+            <option value="消化吸收障碍">消化吸收障碍</option>
+            <option value="肿瘤">肿瘤</option>
+            <option value="糖尿病">糖尿病</option>
+            <option value="肾病">肾病</option>
+            <option value="卒中">卒中</option>
+            <option value="COPD">COPD</option>
+            <option value="其他">其他</option>
+        </select>
+        <span class="fs-count" id="fsCountLabel">共 0 款产品</span>
+    </div>
+
+    <div class="fs-grid" id="fsProductGrid"></div>
 </div>
 
 <script>
@@ -1623,6 +1797,180 @@
 
         // 页面加载时渲染食物表格
         renderFoodTable('');
+
+// ===== 特医食品速查 =====
+        var productData = [
+          {
+            name: '瑞先（肠内营养乳剂TP）',
+            brand: '费森尤斯卡比华瑞',
+            type: '液体',
+            disease: '术后, 消化吸收障碍, 肿瘤',
+            protein: '整蛋白',
+            osmolality: '320',
+            contraindication: '肠道功能衰竭患者禁用；完全性肠道梗阻患者禁用；严重腹腔内感染患者禁用；对本品任一成分过敏者禁用；存在相关成分先天性代谢障碍者禁用；顽固性腹泻需要肠道休息的患者禁用；半乳糖血症患者禁用。'
+          },
+          {
+            name: '瑞素（肠内营养乳剂TP）',
+            brand: '费森尤斯卡比华瑞',
+            type: '液体',
+            disease: '消化吸收障碍, 术后, 肿瘤',
+            protein: '整蛋白',
+            osmolality: '250',
+            contraindication: '肠道功能衰竭患者禁用；完全性肠道梗阻患者禁用；严重腹腔内感染患者禁用；对本品任一成分过敏者禁用；存在相关成分先天性代谢障碍者禁用；顽固性腹泻需要肠道休息的患者禁用；半乳糖血症患者禁用。'
+          },
+          {
+            name: '百普力（肠内营养混悬液SP）',
+            brand: '纽迪希亚',
+            type: '液体',
+            disease: '消化吸收障碍, 术后, 肿瘤, 糖尿病',
+            protein: '短肽',
+            osmolality: '405',
+            contraindication: '①肠道功能衰竭患者禁用；\n②完全性肠道梗阻患者禁用；\n③严重腹腔内感染患者禁用；\n④对本品中任一成分过敏者禁用；\n⑤对本品成分存在先天性代谢障碍者禁用；\n⑥顽固性腹泻需肠道休息治疗的患者禁用；\n⑦半乳糖血症患者禁用。'
+          },
+          {
+            name: '能全素（整蛋白型肠内营养剂）',
+            brand: '纽迪希亚',
+            type: '粉剂',
+            disease: '消化吸收障碍, 术后, 肿瘤, 糖尿病',
+            protein: '整蛋白',
+            osmolality: '415',
+            contraindication: '①肠道功能衰竭患者禁用；\n②完全性肠道梗阻患者禁用；\n③严重腹腔内感染者禁用；\n④对本品中任一成分过敏的患者禁用；\n⑤对本品中任一成分有先天性代谢障碍的患者禁用；\n⑥顽固性腹泻等需要进行肠道休息处理的患者禁用。'
+          },
+          {
+            name: '百普素（短肽型肠内营养剂）',
+            brand: '纽迪希亚',
+            type: '粉剂',
+            disease: '消化吸收障碍, 术后, 肿瘤, 糖尿病',
+            protein: '短肽',
+            osmolality: '405',
+            contraindication: '①肠道功能衰竭患者禁用；\n②完全性肠道梗阻患者禁用；\n③严重腹腔内感染患者禁用；\n④对本品中任一成份过敏的患者禁用；\n⑤对本品中任一成份有先天性代谢障碍的患者禁用；\n⑥顽固性腹泻等需要进行肠道休息处理的患者禁用；\n⑦半乳糖血症患者禁用。'
+          },
+          {
+            name: '能全力（肠内营养混悬液TPF）',
+            brand: '纽迪希亚',
+            type: '液体',
+            disease: '术后, 肿瘤, 糖尿病, 卒中, 其他',
+            protein: '整蛋白',
+            osmolality: '188',
+            contraindication: '严禁静脉输注；完全性胃肠道梗阻、顽固性呕吐、严重消化吸收衰竭者禁用；对本品任一成分过敏者禁用'
+          },
+          {
+            name: '佳膳优选全营养配方粉',
+            brand: '雀巢',
+            type: '粉剂',
+            disease: '术后, 肿瘤, 卒中, COPD',
+            protein: '整蛋白',
+            osmolality: '380',
+            contraindication: '牛奶蛋白过敏者禁用；严禁静脉输注。'
+          },
+          {
+            name: '佰态能特殊医学用途全营养配方食品',
+            brand: '雀巢',
+            type: '液体',
+            disease: '术后, 消化吸收障碍, 肿瘤, COPD, 其他',
+            protein: '短肽',
+            osmolality: '330',
+            contraindication: '禁止静脉输注；肠外营养支持者禁用；牛乳蛋白严重过敏者禁用。'
+          },
+          {
+            name: '伊力佳（肠内营养混悬液TPF-D）',
+            brand: '雅培',
+            type: '液体',
+            disease: '糖尿病, 术后, 卒中, 其他',
+            protein: '整蛋白',
+            osmolality: '325',
+            contraindication: '不能经口/肠内喂养者禁用；牛奶蛋白过敏、半乳糖血症患者禁用；严禁静脉输注。'
+          },
+          {
+            name: '佳维体（肠内营养混悬液TPF-FOS）',
+            brand: '雅培',
+            type: '液体',
+            disease: '术后, 肿瘤, 卒中, COPD, 其他',
+            protein: '整蛋白',
+            osmolality: '320',
+            contraindication: '肠梗阻患者禁用；牛奶蛋白、半乳糖血症患者禁用；禁止静脉输注。'
+          },
+          {
+            name: '安素（肠内营养粉剂TP）',
+            brand: '雅培',
+            type: '粉剂',
+            disease: '术后, 肿瘤, 卒中, COPD, 其他',
+            protein: '整蛋白',
+            osmolality: '379',
+            contraindication: '1. 对本品中任何成份过敏者禁用。\n2. 本品禁用于不能口服或肠内进食的情况，包括肠梗阻，严重的短肠综合征或高排泄量的瘘管。\n3. 本品禁用于半乳糖血症患者。\n4. 本品禁用于对牛奶和大豆蛋白过敏者。\n5. 处于孕期前 3 个月的孕妇或者计划怀孕的妇女，日剂量不得超过 1 罐（400g）（参见【孕妇及哺乳期妇女用药】）。'
+          }
+        ];
+
+        (function() {
+          var filter = document.getElementById('diseaseFilter');
+          var grid = document.getElementById('fsProductGrid');
+          var countLabel = document.getElementById('fsCountLabel');
+
+          function render(disease) {
+            var filtered;
+            if (disease === '全部') {
+              filtered = productData;
+            } else {
+              filtered = [];
+              for (var i = 0; i < productData.length; i++) {
+                if (productData[i].disease.indexOf(disease) !== -1) {
+                  filtered.push(productData[i]);
+                }
+              }
+            }
+
+            countLabel.textContent = '共 ' + filtered.length + ' 款产品';
+
+            if (filtered.length === 0) {
+              grid.innerHTML = '<div class="fs-empty">暂未收录匹配产品</div>';
+              return;
+            }
+
+            var html = '';
+            for (var j = 0; j < filtered.length; j++) {
+              var p = filtered[j];
+              var hasWarning = p.contraindication && p.contraindication !== '无';
+              var warningHtml = hasWarning
+                ? '<div class="fs-warning">⚠ ' + p.contraindication.replace(/\n/g, '<br>') + '</div>'
+                : '';
+
+              html += '<div class="fs-card">'
+                + '<h3>' + p.name + '</h3>'
+                + '<div class="fs-meta">'
+                + '<span><span class="fs-label">品牌</span> ' + p.brand + '</span><br>'
+                + '<span><span class="fs-label">剂型</span> ' + p.type + '</span>'
+                + '<span><span class="fs-label">蛋白质</span> ' + p.protein + '</span>'
+                + '<span><span class="fs-label">渗透压</span> ' + p.osmolality + ' mOsm/L</span>'
+                + '</div>'
+                + warningHtml
+                + '</div>';
+            }
+            grid.innerHTML = html;
+          }
+
+          filter.addEventListener('change', function() {
+            render(this.value);
+          });
+
+          render('全部');
+        })();
+
+// ===== 标签页切换 =====
+        var navBtns = document.querySelectorAll('.nav-btn');
+        var tabs = document.querySelectorAll('.tab-content');
+
+        navBtns.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                // 更新按钮状态
+                navBtns.forEach(function(b) { b.classList.remove('active'); });
+                this.classList.add('active');
+
+                // 更新标签页
+                var tabId = 'tab-' + this.getAttribute('data-tab');
+                tabs.forEach(function(t) { t.classList.remove('active'); });
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
 
 // 页面加载后渲染历史、初始化图表、自动计算默认值
         window.addEventListener('DOMContentLoaded', function() {
