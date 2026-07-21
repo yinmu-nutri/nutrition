@@ -772,56 +772,547 @@
             margin-left: 6px;
         }
 
-        /* ===== 特医食品速查样式 ===== */
-        .fs-filter-bar {
-            display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
-            margin-bottom: 24px; background: #fff; padding: 12px 16px;
-            border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,.08);
-        }
-        .fs-filter-bar label { font-size: 14px; font-weight: 500; color: #636e72; }
-        .fs-filter-bar select {
-            flex: 1; min-width: 160px; padding: 8px 12px; font-size: 14px;
-            border: 2px solid #dfe6e9; border-radius: 8px; background: #fff;
-            color: #2d3436; appearance: auto; cursor: pointer; font-family: inherit;
-            outline: none; transition: border-color 0.2s ease;
-        }
-        .fs-filter-bar select:focus {
-            border-color: #6c5ce7;
-            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.15);
-        }
-        .fs-filter-bar .fs-count {
-            font-size: 13px; color: #636e72; white-space: nowrap;
-            margin-left: auto;
-        }
-        .fs-grid {
-            display: grid; gap: 14px;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        }
-        .fs-card {
+        /* ===== 餐盘生成器 ===== */
+        .plate-card {
             background: rgba(255, 255, 255, 0.92);
             backdrop-filter: blur(8px);
-            border-radius: 12px; padding: 16px 18px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+            border-radius: 16px;
+            padding: 24px 28px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+            margin-bottom: 20px;
+        }
+
+        .plate-question {
+            margin-bottom: 22px;
+        }
+        .plate-question:last-of-type {
+            margin-bottom: 0;
+        }
+
+        .plate-question-label {
+            font-size: 15px;
+            font-weight: 600;
+            color: #2d3436;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .plate-question-label::before {
+            content: "";
+            display: inline-block;
+            width: 4px;
+            height: 16px;
+            background: #E88A5A;
+            border-radius: 2px;
+        }
+
+        .plate-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .plate-option-btn {
+            flex: 1;
+            min-width: 80px;
+            padding: 12px 16px;
+            border: 2px solid #dfe6e9;
+            border-radius: 10px;
+            background: #f8f9fa;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 500;
+            color: #636e72;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        .plate-option-btn:hover {
+            border-color: #E88A5A;
+            color: #E88A5A;
+        }
+
+        .plate-option-btn.selected {
+            background: #E88A5A;
+            border-color: #E88A5A;
+            color: #fff;
+        }
+
+        .plate-selected-hint {
+            font-size: 13px;
+            color: #b2bec3;
+            margin-top: 6px;
+            min-height: 20px;
+        }
+
+        .plate-selected-hint.has-value {
+            color: #E88A5A;
+            font-weight: 500;
+        }
+
+        .plate-summary-bar {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin: 22px 0 14px;
+            font-size: 14px;
+            color: #636e72;
+            text-align: center;
+            line-height: 1.6;
+            border: 1px solid #f0f1f3;
+        }
+
+        .plate-summary-bar .highlight {
+            color: #E88A5A;
+            font-weight: 600;
+        }
+
+        .btn-generate {
+            width: 100%;
+            padding: 16px 0;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #E88A5A, #f0a07a);
+            color: #fff;
+            font-size: 18px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            letter-spacing: 1px;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
-        .fs-card:hover {
+
+        .btn-generate:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 24px rgba(232, 138, 90, 0.35);
         }
-        .fs-card h3 {
-            font-size: 15px; font-weight: 600; color: #2d3436;
-            margin-bottom: 10px; line-height: 1.4;
+
+        .btn-generate:active {
+            transform: translateY(0);
         }
-        .fs-card .fs-meta { font-size: 13px; color: #636e72; line-height: 1.7; }
-        .fs-card .fs-meta .fs-label { color: #b2bec3; }
-        .fs-card .fs-warning {
-            margin-top: 8px; padding: 6px 10px; border-radius: 6px;
-            background: #fff0f0; color: #c41e3a; font-size: 12px; line-height: 1.5;
-            border-left: 3px solid #c41e3a;
+
+        .btn-generate:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
         }
-        .fs-empty {
-            grid-column: 1 / -1; text-align: center; padding: 48px 16px;
-            color: #b2bec3; font-size: 15px;
+
+        /* ===== 餐盘结果区 ===== */
+        .plate-result {
+            display: none;
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        .plate-result.visible {
+            display: block;
+        }
+
+        .plate-result-section {
+            margin-bottom: 20px;
+        }
+
+        .plate-result-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .plate-result-section h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2d3436;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .plate-result-section h3::before {
+            content: "";
+            display: inline-block;
+            width: 4px;
+            height: 18px;
+            background: #E88A5A;
+            border-radius: 2px;
+        }
+
+        .plate-chart-wrap {
+            position: relative;
+            max-width: 280px;
+            margin: 0 auto 16px;
+        }
+
+        .plate-macro-detail {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 4px;
+        }
+
+        .plate-macro-item {
+            text-align: center;
+            padding: 8px 16px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            min-width: 80px;
+        }
+
+        .plate-macro-item .macro-color-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+
+        .plate-macro-item .macro-name {
+            font-size: 13px;
+            color: #636e72;
+        }
+
+        .plate-macro-item .macro-gram {
+            font-size: 18px;
+            font-weight: 700;
+            color: #2d3436;
+            margin-top: 2px;
+        }
+
+        .plate-macro-item .macro-pct {
+            font-size: 12px;
+            color: #b2bec3;
+        }
+
+        /* ===== 食物搭配清单 ===== */
+        .plate-food-grid {
+            display: grid;
+            gap: 10px;
+        }
+
+        .plate-food-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+
+        .plate-food-item.good {
+            background: #f0f9f0;
+        }
+
+        .plate-food-item.bad {
+            background: #fdf0f0;
+        }
+
+        .plate-food-tag {
+            flex-shrink: 0;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 10px;
+            border-radius: 6px;
+            letter-spacing: 0.5px;
+        }
+
+        .plate-food-tag.good-tag {
+            background: #7BAF7A;
+            color: #fff;
+        }
+
+        .plate-food-tag.bad-tag {
+            background: #e17055;
+            color: #fff;
+        }
+
+        .plate-food-text {
+            color: #2d3436;
+            line-height: 1.4;
+        }
+
+        .plate-food-text .food-label {
+            font-weight: 600;
+        }
+
+        .plate-food-name {
+            font-weight: 600;
+            color: #2d3436;
+        }
+
+        .food-serving {
+            font-size: 13px;
+            color: #636e72;
+        }
+
+        .food-nutrition {
+            font-size: 12px;
+            color: #b2bec3;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 540px) {
+            .food-nutrition {
+                display: block;
+                white-space: normal;
+                margin-top: 2px;
+                padding-left: 0;
+            }
+        }
+
+        /* ===== 三餐网格 ===== */
+        .meal-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .meal-card {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(8px);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+            border: 2px solid transparent;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .meal-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+        }
+
+        .meal-card.highlight {
+            border-color: #6c5ce7;
+            background: rgba(108, 92, 231, 0.04);
+        }
+
+        .meal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 14px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f1f3;
+            gap: 8px;
+        }
+
+        .meal-title {
+            font-size: 17px;
+            font-weight: 700;
+            color: #2d3436;
+            flex-shrink: 0;
+        }
+
+        .meal-summary {
+            font-size: 11px;
+            color: #636e72;
+            text-align: right;
+            line-height: 1.5;
+        }
+
+        .meal-body {
+            display: grid;
+            gap: 8px;
+        }
+
+        .meal-food-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            background: #f8f9fa;
+            font-size: 13px;
+        }
+
+        .meal-food-item .food-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .meal-food-item .food-dot.staple { background: #E88A5A; }
+        .meal-food-item .food-dot.meat   { background: #e17055; }
+        .meal-food-item .food-dot.veg    { background: #7BAF7A; }
+        .meal-food-item .food-dot.fruit  { background: #B39DDB; }
+
+        .meal-food-item .food-info {
+            flex: 1;
+            line-height: 1.4;
+            min-width: 0;
+        }
+
+        .meal-food-item .food-name {
+            font-weight: 600;
+            color: #2d3436;
+        }
+
+        .meal-food-item .food-nutrition {
+            font-size: 11px;
+            color: #b2bec3;
+        }
+
+        @media (max-width: 640px) {
+            .meal-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ===== 替换建议 ===== */
+        .plate-swap-list {
+            list-style: none;
+        }
+
+        .plate-swap-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 14px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #2d3436;
+        }
+
+        .plate-swap-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .plate-swap-item .swap-icon {
+            flex-shrink: 0;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: #7BAF7A;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .plate-swap-all-good {
+            text-align: center;
+            padding: 24px;
+            color: #7BAF7A;
+            font-size: 15px;
+            font-weight: 500;
+            background: #f0f9f0;
+            border-radius: 10px;
+            line-height: 1.6;
+        }
+
+        /* ===== 用户画像提示卡 ===== */
+        .profile-card {
+            border-left: 4px solid #6c5ce7;
+        }
+
+        .profile-card-content {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+        }
+
+        .profile-icon {
+            font-size: 28px;
+            flex-shrink: 0;
+            line-height: 1;
+        }
+
+        .profile-info {
+            flex: 1;
+        }
+
+        .profile-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #2d3436;
+            margin-bottom: 8px;
+        }
+
+        .profile-stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 16px;
+        }
+
+        .profile-stat {
+            font-size: 13px;
+            color: #636e72;
+        }
+
+        .profile-stat .stat-label {
+            color: #b2bec3;
+        }
+
+        .profile-stat .stat-value {
+            font-weight: 600;
+            color: #6c5ce7;
+        }
+
+        /* ===== 快捷使用按钮 ===== */
+        .btn-quick-use {
+            width: 100%;
+            padding: 12px 0;
+            border: 2px solid #6c5ce7;
+            border-radius: 12px;
+            background: rgba(108, 92, 231, 0.08);
+            color: #6c5ce7;
+            font-size: 15px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+            transition: all 0.2s ease;
+            margin-bottom: 16px;
+        }
+
+        .btn-quick-use:hover {
+            background: #6c5ce7;
+            color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(108, 92, 231, 0.25);
+        }
+
+        /* ===== 餐盘生成器移动端适配 ===== */
+        @media (max-width: 540px) {
+            .plate-card {
+                padding: 18px 16px;
+                border-radius: 12px;
+            }
+
+            .plate-option-btn {
+                min-width: 60px;
+                padding: 10px 12px;
+                font-size: 13px;
+            }
+
+            .plate-macro-detail {
+                gap: 10px;
+            }
+
+            .plate-macro-item {
+                padding: 6px 12px;
+                min-width: 70px;
+            }
+
+            .plate-chart-wrap {
+                max-width: 220px;
+            }
+
+            .btn-generate {
+                font-size: 16px;
+                padding: 14px 0;
+            }
         }
 
         @media (max-width: 540px) {
@@ -938,11 +1429,6 @@
                 font-size: 14px;
                 padding: 12px 10px;
             }
-
-            .fs-filter-bar { flex-direction: column; align-items: stretch; }
-            .fs-filter-bar select { width: 100%; }
-            .fs-filter-bar .fs-count { margin-left: 0; text-align: right; }
-            .fs-grid { grid-template-columns: 1fr; }
         }
 
         @media (max-width: 380px) {
@@ -958,7 +1444,7 @@
 <nav class="nav-bar">
     <div class="nav-inner">
         <button class="nav-btn active" data-tab="calculator">营养计算器</button>
-        <button class="nav-btn" data-tab="foods">特医食品速查</button>
+        <button class="nav-btn" data-tab="plate">餐盘生成器</button>
     </div>
 </nav>
 
@@ -1168,30 +1654,114 @@
     </details>
 </div>
 
-<!-- ===== 标签页：特医食品速查 ===== -->
-<div class="tab-content" id="tab-foods">
+<!-- ===== 标签页：餐盘生成器 ===== -->
+<div class="tab-content" id="tab-plate">
     <div class="app-title">
-        <h1>特医食品速查</h1>
-        <p>特殊医学用途配方食品数据库</p>
+        <h1>餐盘生成器</h1>
+        <p>智能搭配你的每一餐</p>
     </div>
 
-    <div class="fs-filter-bar">
-        <label for="diseaseFilter">适用疾病</label>
-        <select id="diseaseFilter">
-            <option value="全部">全部</option>
-            <option value="术后">术后</option>
-            <option value="消化吸收障碍">消化吸收障碍</option>
-            <option value="肿瘤">肿瘤</option>
-            <option value="糖尿病">糖尿病</option>
-            <option value="肾病">肾病</option>
-            <option value="卒中">卒中</option>
-            <option value="COPD">COPD</option>
-            <option value="其他">其他</option>
-        </select>
-        <span class="fs-count" id="fsCountLabel">共 0 款产品</span>
+    <!-- 用户画像提示卡（默认隐藏，计算完成后显示） -->
+    <div class="plate-card profile-card" id="profileCard" style="display:none;">
+        <div class="profile-card-content">
+            <span class="profile-icon">📋</span>
+            <div class="profile-info">
+                <div class="profile-title">检测到你的营养需求</div>
+                <div class="profile-stats" id="profileStats"></div>
+            </div>
+        </div>
     </div>
 
-    <div class="fs-grid" id="fsProductGrid"></div>
+    <!-- 输入区 -->
+    <div class="plate-card">
+        <!-- 问题1 -->
+        <div class="plate-question">
+            <div class="plate-question-label">你的目标是什么？</div>
+            <div class="plate-options" data-question="goal">
+                <button class="plate-option-btn" data-value="减重">减重</button>
+                <button class="plate-option-btn" data-value="增肌">增肌</button>
+                <button class="plate-option-btn" data-value="保持现状">保持现状</button>
+            </div>
+            <div class="plate-selected-hint" data-hint="goal">请选择</div>
+        </div>
+
+        <!-- 问题2 -->
+        <div class="plate-question">
+            <div class="plate-question-label">哪一餐最容易凑合？</div>
+            <div class="plate-options" data-question="meal">
+                <button class="plate-option-btn" data-value="早餐">早餐</button>
+                <button class="plate-option-btn" data-value="午餐">午餐</button>
+                <button class="plate-option-btn" data-value="晚餐">晚餐</button>
+                <button class="plate-option-btn" data-value="都还行">都还行</button>
+            </div>
+            <div class="plate-selected-hint" data-hint="meal">请选择</div>
+        </div>
+
+        <!-- 问题3 -->
+        <div class="plate-question">
+            <div class="plate-question-label">你的活动水平？</div>
+            <div class="plate-options" data-question="activity">
+                <button class="plate-option-btn" data-value="久坐为主">久坐为主</button>
+                <button class="plate-option-btn" data-value="偶尔运动">偶尔运动</button>
+                <button class="plate-option-btn" data-value="经常运动">经常运动</button>
+            </div>
+            <div class="plate-selected-hint" data-hint="activity">请选择</div>
+        </div>
+
+        <!-- 快捷使用计算结果按钮（默认隐藏） -->
+        <button class="btn-quick-use" id="quickUseBtn" style="display:none;">⚡ 使用我的计算结果</button>
+
+        <!-- 摘要 -->
+        <div class="plate-summary-bar" id="plateSummary">
+            请完成以上三个选择，然后点击下方按钮生成餐盘
+        </div>
+
+        <!-- 生成按钮 -->
+        <button class="btn-generate" id="generateBtn" disabled>生成我的餐盘</button>
+    </div>
+
+    <!-- 结果区 -->
+    <div class="plate-result" id="plateResult">
+        <!-- 环形图 + 全天克数 -->
+        <div class="plate-card plate-result-section">
+            <h3>你的全天营养目标</h3>
+            <div class="plate-chart-wrap">
+                <canvas id="plateChart"></canvas>
+            </div>
+            <div class="plate-macro-detail" id="plateMacroDetail"></div>
+        </div>
+
+        <!-- 三餐卡片 -->
+        <div class="meal-grid" id="mealGrid">
+            <div class="meal-card" id="meal早餐">
+                <div class="meal-header">
+                    <span class="meal-title">🌅 早餐</span>
+                    <span class="meal-summary" id="早餐Summary"></span>
+                </div>
+                <div class="meal-body" id="早餐Body"></div>
+            </div>
+            <div class="meal-card" id="meal午餐">
+                <div class="meal-header">
+                    <span class="meal-title">☀️ 午餐</span>
+                    <span class="meal-summary" id="午餐Summary"></span>
+                </div>
+                <div class="meal-body" id="午餐Body"></div>
+            </div>
+            <div class="meal-card" id="meal晚餐">
+                <div class="meal-header">
+                    <span class="meal-title">🌙 晚餐</span>
+                    <span class="meal-summary" id="晚餐Summary"></span>
+                </div>
+                <div class="meal-body" id="晚餐Body"></div>
+            </div>
+        </div>
+
+        <!-- 凑合餐替换建议 -->
+        <div class="plate-card plate-result-section" id="swapSection">
+            <h3>餐单替换建议</h3>
+            <div id="plateSwapContainer"></div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -1609,6 +2179,21 @@
 
             // === 更新供能比饼图 ===
             updateMacroChart();
+
+            // === 保存到全局用户画像（供餐盘生成器联动） ===
+            window.userProfile = {
+                tdee: result.tdee,
+                bmi: result.bmi,
+                bmiEval: result.bmiEval,
+                bmr: result.bmr,
+                carbsRange: result.carbsRange,
+                proteinRange: result.proteinRange,
+                fatRange: result.fatRange,
+                weight: weight,
+                height: height,
+                age: age,
+                gender: gender
+            };
         }
 
         // ===== 事件绑定 =====
@@ -1665,7 +2250,7 @@
 
         /** 食物数据库 — 参考《中国食物成分表》 */
         var FOOD_DATA = [
-            // ---- 主食类 ----
+            // ==================== 主食类 (30种) ====================
             { name: '米饭',   cat: '主食', catCls: 'staple', kcal: 116, carbs: 25.6, protein: 2.6, fat: 0.3 },
             { name: '馒头',   cat: '主食', catCls: 'staple', kcal: 223, carbs: 44.2, protein: 7.0, fat: 1.1 },
             { name: '面条(煮)', cat: '主食', catCls: 'staple', kcal: 110, carbs: 24.3, protein: 3.4, fat: 0.2 },
@@ -1679,7 +2264,24 @@
             { name: '山药',   cat: '主食', catCls: 'staple', kcal: 57,  carbs: 12.4, protein: 1.9, fat: 0.2 },
             { name: '紫薯',   cat: '主食', catCls: 'staple', kcal: 106, carbs: 24.7, protein: 1.9, fat: 0.1 },
             { name: '油条',   cat: '主食', catCls: 'staple', kcal: 386, carbs: 51.0, protein: 6.9, fat: 17.6 },
-            // ---- 肉类 ----
+            { name: '荞麦面',  cat: '主食', catCls: 'staple', kcal: 340, carbs: 70.6, protein: 11.3, fat: 2.5 },
+            { name: '杂粮馒头', cat: '主食', catCls: 'staple', kcal: 215, carbs: 42.0, protein: 6.8, fat: 2.0 },
+            { name: '南瓜粥',  cat: '主食', catCls: 'staple', kcal: 38,  carbs: 7.5,  protein: 1.1, fat: 0.4 },
+            { name: '黑米',   cat: '主食', catCls: 'staple', kcal: 333, carbs: 72.2, protein: 9.4, fat: 2.5 },
+            { name: '薏米',   cat: '主食', catCls: 'staple', kcal: 357, carbs: 71.1, protein: 12.8, fat: 3.3 },
+            { name: '藜麦',   cat: '主食', catCls: 'staple', kcal: 368, carbs: 64.2, protein: 14.1, fat: 6.1 },
+            { name: '糯米',   cat: '主食', catCls: 'staple', kcal: 348, carbs: 77.5, protein: 7.3, fat: 1.0 },
+            { name: '荞麦',   cat: '主食', catCls: 'staple', kcal: 324, carbs: 66.5, protein: 9.3, fat: 2.3 },
+            { name: '大麦',   cat: '主食', catCls: 'staple', kcal: 327, carbs: 73.5, protein: 10.6, fat: 1.7 },
+            { name: '小米',   cat: '主食', catCls: 'staple', kcal: 358, carbs: 73.5, protein: 9.0, fat: 3.1 },
+            { name: '通心粉',  cat: '主食', catCls: 'staple', kcal: 350, carbs: 75.8, protein: 11.0, fat: 0.5 },
+            { name: '方便面',  cat: '主食', catCls: 'staple', kcal: 472, carbs: 61.9, protein: 9.5, fat: 21.1 },
+            { name: '烧饼',   cat: '主食', catCls: 'staple', kcal: 326, carbs: 61.6, protein: 8.2, fat: 4.2 },
+            { name: '花卷',   cat: '主食', catCls: 'staple', kcal: 211, carbs: 42.4, protein: 6.4, fat: 1.8 },
+            { name: '粉丝',   cat: '主食', catCls: 'staple', kcal: 335, carbs: 83.7, protein: 0.8, fat: 0.2 },
+            { name: '年糕',   cat: '主食', catCls: 'staple', kcal: 154, carbs: 34.7, protein: 3.3, fat: 0.6 },
+            { name: '粽子',   cat: '主食', catCls: 'staple', kcal: 195, carbs: 37.0, protein: 4.5, fat: 3.5 },
+            // ==================== 肉类 / 蛋白质 (35种) ====================
             { name: '鸡胸肉',  cat: '肉类', catCls: 'meat', kcal: 133, carbs: 0,    protein: 31.0, fat: 1.2 },
             { name: '鸡腿肉',  cat: '肉类', catCls: 'meat', kcal: 181, carbs: 0,    protein: 20.0, fat: 11.0 },
             { name: '鸡翅',   cat: '肉类', catCls: 'meat', kcal: 194, carbs: 0,    protein: 17.4, fat: 13.6 },
@@ -1697,7 +2299,25 @@
             { name: '基围虾',  cat: '肉类', catCls: 'meat', kcal: 87,  carbs: 0,    protein: 18.2, fat: 1.4 },
             { name: '三文鱼',  cat: '肉类', catCls: 'meat', kcal: 139, carbs: 0,    protein: 21.3, fat: 6.3 },
             { name: '金枪鱼',  cat: '肉类', catCls: 'meat', kcal: 130, carbs: 0,    protein: 26.0, fat: 2.5 },
-            // ---- 蔬菜类 ----
+            { name: '鸭肉',   cat: '肉类', catCls: 'meat', kcal: 240, carbs: 0,    protein: 15.5, fat: 19.7 },
+            { name: '鹅肉',   cat: '肉类', catCls: 'meat', kcal: 251, carbs: 0,    protein: 17.9, fat: 19.9 },
+            { name: '羊瘦肉',  cat: '肉类', catCls: 'meat', kcal: 118, carbs: 0,    protein: 20.5, fat: 3.9 },
+            { name: '牛腱子',  cat: '肉类', catCls: 'meat', kcal: 106, carbs: 0,    protein: 21.0, fat: 2.0 },
+            { name: '猪蹄',   cat: '肉类', catCls: 'meat', kcal: 260, carbs: 0,    protein: 22.6, fat: 18.8 },
+            { name: '鸡胗',   cat: '肉类', catCls: 'meat', kcal: 118, carbs: 1.3,  protein: 19.2, fat: 3.8 },
+            { name: '鹌鹑蛋',  cat: '肉类', catCls: 'meat', kcal: 160, carbs: 0.4,  protein: 12.8, fat: 11.1 },
+            { name: '带鱼',   cat: '肉类', catCls: 'meat', kcal: 127, carbs: 0,    protein: 17.7, fat: 4.9 },
+            { name: '鲫鱼',   cat: '肉类', catCls: 'meat', kcal: 108, carbs: 0,    protein: 17.1, fat: 4.0 },
+            { name: '鲈鱼',   cat: '肉类', catCls: 'meat', kcal: 105, carbs: 0,    protein: 18.6, fat: 3.4 },
+            { name: '鳕鱼',   cat: '肉类', catCls: 'meat', kcal: 88,  carbs: 0,    protein: 20.4, fat: 0.5 },
+            { name: '黄花鱼',  cat: '肉类', catCls: 'meat', kcal: 97,  carbs: 0,    protein: 17.7, fat: 2.5 },
+            { name: '蛤蜊',   cat: '肉类', catCls: 'meat', kcal: 62,  carbs: 2.8,  protein: 10.0, fat: 0.8 },
+            { name: '牡蛎',   cat: '肉类', catCls: 'meat', kcal: 73,  carbs: 5.0,  protein: 5.7,  fat: 2.7 },
+            { name: '扇贝',   cat: '肉类', catCls: 'meat', kcal: 77,  carbs: 2.6,  protein: 14.2, fat: 0.8 },
+            { name: '螃蟹',   cat: '肉类', catCls: 'meat', kcal: 95,  carbs: 2.3,  protein: 13.8, fat: 3.6 },
+            { name: '腊肉',   cat: '肉类', catCls: 'meat', kcal: 498, carbs: 2.9,  protein: 13.0, fat: 48.9 },
+            { name: '猪排骨',  cat: '肉类', catCls: 'meat', kcal: 264, carbs: 0,    protein: 18.3, fat: 20.4 },
+            // ==================== 蔬菜类 (30种) ====================
             { name: '西兰花',  cat: '蔬菜', catCls: 'veg', kcal: 34,  carbs: 6.6,  protein: 2.8, fat: 0.4 },
             { name: '菠菜',   cat: '蔬菜', catCls: 'veg', kcal: 24,  carbs: 4.5,  protein: 2.6, fat: 0.3 },
             { name: '西红柿',  cat: '蔬菜', catCls: 'veg', kcal: 19,  carbs: 4.0,  protein: 0.9, fat: 0.2 },
@@ -1714,7 +2334,21 @@
             { name: '蘑菇',   cat: '蔬菜', catCls: 'veg', kcal: 20,  carbs: 4.1,  protein: 2.7, fat: 0.1 },
             { name: '香菇',   cat: '蔬菜', catCls: 'veg', kcal: 26,  carbs: 5.2,  protein: 2.2, fat: 0.3 },
             { name: '海带',   cat: '蔬菜', catCls: 'veg', kcal: 12,  carbs: 2.0,  protein: 1.2, fat: 0.1 },
-            // ---- 水果类 ----
+            { name: '油麦菜',  cat: '蔬菜', catCls: 'veg', kcal: 15,  carbs: 2.1,  protein: 1.5, fat: 0.2 },
+            { name: '芦笋',   cat: '蔬菜', catCls: 'veg', kcal: 19,  carbs: 3.9,  protein: 2.2, fat: 0.1 },
+            { name: '绿豆芽',  cat: '蔬菜', catCls: 'veg', kcal: 18,  carbs: 3.6,  protein: 2.1, fat: 0.1 },
+            { name: '菜花',   cat: '蔬菜', catCls: 'veg', kcal: 24,  carbs: 4.6,  protein: 2.1, fat: 0.3 },
+            { name: '空心菜',  cat: '蔬菜', catCls: 'veg', kcal: 20,  carbs: 3.6,  protein: 2.2, fat: 0.2 },
+            { name: '茼蒿',   cat: '蔬菜', catCls: 'veg', kcal: 21,  carbs: 3.9,  protein: 1.9, fat: 0.3 },
+            { name: '韭菜',   cat: '蔬菜', catCls: 'veg', kcal: 26,  carbs: 4.6,  protein: 2.4, fat: 0.4 },
+            { name: '蒜苗',   cat: '蔬菜', catCls: 'veg', kcal: 37,  carbs: 8.0,  protein: 2.1, fat: 0.4 },
+            { name: '洋葱',   cat: '蔬菜', catCls: 'veg', kcal: 39,  carbs: 9.0,  protein: 1.1, fat: 0.1 },
+            { name: '莲藕',   cat: '蔬菜', catCls: 'veg', kcal: 73,  carbs: 16.4, protein: 2.6, fat: 0.2 },
+            { name: '竹笋',   cat: '蔬菜', catCls: 'veg', kcal: 19,  carbs: 3.6,  protein: 2.6, fat: 0.2 },
+            { name: '苦瓜',   cat: '蔬菜', catCls: 'veg', kcal: 19,  carbs: 4.3,  protein: 1.0, fat: 0.1 },
+            { name: '丝瓜',   cat: '蔬菜', catCls: 'veg', kcal: 20,  carbs: 4.3,  protein: 1.0, fat: 0.1 },
+            { name: '秋葵',   cat: '蔬菜', catCls: 'veg', kcal: 31,  carbs: 7.0,  protein: 2.0, fat: 0.1 },
+            // ==================== 水果类 (25种) ====================
             { name: '苹果',   cat: '水果', catCls: 'fruit', kcal: 52,  carbs: 13.5, protein: 0.2, fat: 0.2 },
             { name: '香蕉',   cat: '水果', catCls: 'fruit', kcal: 89,  carbs: 22.8, protein: 1.1, fat: 0.3 },
             { name: '橙子',   cat: '水果', catCls: 'fruit', kcal: 47,  carbs: 11.8, protein: 0.9, fat: 0.1 },
@@ -1727,7 +2361,20 @@
             { name: '火龙果',  cat: '水果', catCls: 'fruit', kcal: 55,  carbs: 13.0, protein: 1.1, fat: 0.4 },
             { name: '柚子',   cat: '水果', catCls: 'fruit', kcal: 42,  carbs: 9.6,  protein: 0.8, fat: 0.2 },
             { name: '柠檬',   cat: '水果', catCls: 'fruit', kcal: 29,  carbs: 9.3,  protein: 1.1, fat: 0.3 },
-            // ---- 零食饮品类 ----
+            { name: '梨',    cat: '水果', catCls: 'fruit', kcal: 51,  carbs: 13.1, protein: 0.4, fat: 0.2 },
+            { name: '樱桃',   cat: '水果', catCls: 'fruit', kcal: 46,  carbs: 10.6, protein: 1.1, fat: 0.2 },
+            { name: '菠萝',   cat: '水果', catCls: 'fruit', kcal: 41,  carbs: 10.8, protein: 0.5, fat: 0.1 },
+            { name: '木瓜',   cat: '水果', catCls: 'fruit', kcal: 39,  carbs: 9.2,  protein: 0.6, fat: 0.1 },
+            { name: '哈密瓜',  cat: '水果', catCls: 'fruit', kcal: 34,  carbs: 8.2,  protein: 0.5, fat: 0.1 },
+            { name: '荔枝',   cat: '水果', catCls: 'fruit', kcal: 66,  carbs: 16.6, protein: 0.9, fat: 0.4 },
+            { name: '龙眼',   cat: '水果', catCls: 'fruit', kcal: 71,  carbs: 16.6, protein: 1.2, fat: 0.2 },
+            { name: '石榴',   cat: '水果', catCls: 'fruit', kcal: 63,  carbs: 14.5, protein: 1.0, fat: 0.3 },
+            { name: '百香果',  cat: '水果', catCls: 'fruit', kcal: 97,  carbs: 23.4, protein: 2.2, fat: 0.7 },
+            { name: '桃子',   cat: '水果', catCls: 'fruit', kcal: 42,  carbs: 10.1, protein: 0.9, fat: 0.2 },
+            { name: '杏',    cat: '水果', catCls: 'fruit', kcal: 38,  carbs: 9.1,  protein: 0.9, fat: 0.1 },
+            { name: '李子',   cat: '水果', catCls: 'fruit', kcal: 36,  carbs: 8.7,  protein: 0.7, fat: 0.2 },
+            { name: '椰子肉',  cat: '水果', catCls: 'fruit', kcal: 354, carbs: 31.3, protein: 3.3, fat: 33.5 },
+            // ==================== 零食饮品类 (30种) ====================
             { name: '牛奶(全脂)', cat: '饮品', catCls: 'snack', kcal: 65,  carbs: 4.9,  protein: 3.2, fat: 3.6 },
             { name: '酸奶(原味)', cat: '饮品', catCls: 'snack', kcal: 72,  carbs: 9.5,  protein: 3.0, fat: 2.5 },
             { name: '豆浆',   cat: '饮品', catCls: 'snack', kcal: 31,  carbs: 2.9,  protein: 2.9, fat: 1.0 },
@@ -1741,6 +2388,23 @@
             { name: '杏仁',   cat: '零食', catCls: 'snack', kcal: 578, carbs: 19.7, protein: 21.2, fat: 49.9 },
             { name: '花生(炒)', cat: '零食', catCls: 'snack', kcal: 563, carbs: 21.7, protein: 24.8, fat: 44.3 },
             { name: '豆腐',   cat: '饮品', catCls: 'snack', kcal: 81,  carbs: 4.2,  protein: 8.1, fat: 3.7 },
+            { name: '全麦苏打饼干', cat: '零食', catCls: 'snack', kcal: 410, carbs: 70.0, protein: 9.0, fat: 10.0 },
+            { name: '黑咖啡',  cat: '饮品', catCls: 'snack', kcal: 2,   carbs: 0,    protein: 0.2, fat: 0 },
+            { name: '绿茶',   cat: '饮品', catCls: 'snack', kcal: 1,   carbs: 0,    protein: 0,   fat: 0 },
+            { name: '红茶',   cat: '饮品', catCls: 'snack', kcal: 1,   carbs: 0,    protein: 0,   fat: 0 },
+            { name: '乌龙茶',  cat: '饮品', catCls: 'snack', kcal: 1,   carbs: 0,    protein: 0,   fat: 0 },
+            { name: '蛋白粉',  cat: '饮品', catCls: 'snack', kcal: 400, carbs: 6.0,  protein: 80.0, fat: 3.0 },
+            { name: '豆腐脑',  cat: '饮品', catCls: 'snack', kcal: 15,  carbs: 1.7,  protein: 1.9, fat: 0.3 },
+            { name: '脱脂牛奶', cat: '饮品', catCls: 'snack', kcal: 35,  carbs: 5.0,  protein: 3.4, fat: 0.1 },
+            { name: '拿铁咖啡', cat: '饮品', catCls: 'snack', kcal: 45,  carbs: 5.0,  protein: 2.5, fat: 1.8 },
+            { name: '椰子水',  cat: '饮品', catCls: 'snack', kcal: 19,  carbs: 4.2,  protein: 0.7, fat: 0.2 },
+            { name: '运动饮料', cat: '饮品', catCls: 'snack', kcal: 26,  carbs: 6.4,  protein: 0,   fat: 0 },
+            { name: '腰果',   cat: '零食', catCls: 'snack', kcal: 552, carbs: 26.9, protein: 17.3, fat: 43.8 },
+            { name: '开心果',  cat: '零食', catCls: 'snack', kcal: 560, carbs: 27.2, protein: 20.2, fat: 45.3 },
+            { name: '松子',   cat: '零食', catCls: 'snack', kcal: 673, carbs: 13.1, protein: 14.1, fat: 68.4 },
+            { name: '瓜子(炒)', cat: '零食', catCls: 'snack', kcal: 582, carbs: 20.0, protein: 22.6, fat: 49.8 },
+            { name: '牛肉干',  cat: '零食', catCls: 'snack', kcal: 550, carbs: 22.0, protein: 45.6, fat: 29.5 },
+            { name: '海苔',   cat: '零食', catCls: 'snack', kcal: 177, carbs: 24.0, protein: 29.0, fat: 3.5 },
         ];
 
         /** 获取热量 CSS 类名 */
@@ -1798,161 +2462,417 @@
         // 页面加载时渲染食物表格
         renderFoodTable('');
 
-// ===== 特医食品速查 =====
-        var productData = [
-          {
-            name: '瑞先（肠内营养乳剂TP）',
-            brand: '费森尤斯卡比华瑞',
-            type: '液体',
-            disease: '术后, 消化吸收障碍, 肿瘤',
-            protein: '整蛋白',
-            osmolality: '320',
-            contraindication: '肠道功能衰竭患者禁用；完全性肠道梗阻患者禁用；严重腹腔内感染患者禁用；对本品任一成分过敏者禁用；存在相关成分先天性代谢障碍者禁用；顽固性腹泻需要肠道休息的患者禁用；半乳糖血症患者禁用。'
-          },
-          {
-            name: '瑞素（肠内营养乳剂TP）',
-            brand: '费森尤斯卡比华瑞',
-            type: '液体',
-            disease: '消化吸收障碍, 术后, 肿瘤',
-            protein: '整蛋白',
-            osmolality: '250',
-            contraindication: '肠道功能衰竭患者禁用；完全性肠道梗阻患者禁用；严重腹腔内感染患者禁用；对本品任一成分过敏者禁用；存在相关成分先天性代谢障碍者禁用；顽固性腹泻需要肠道休息的患者禁用；半乳糖血症患者禁用。'
-          },
-          {
-            name: '百普力（肠内营养混悬液SP）',
-            brand: '纽迪希亚',
-            type: '液体',
-            disease: '消化吸收障碍, 术后, 肿瘤, 糖尿病',
-            protein: '短肽',
-            osmolality: '405',
-            contraindication: '①肠道功能衰竭患者禁用；\n②完全性肠道梗阻患者禁用；\n③严重腹腔内感染患者禁用；\n④对本品中任一成分过敏者禁用；\n⑤对本品成分存在先天性代谢障碍者禁用；\n⑥顽固性腹泻需肠道休息治疗的患者禁用；\n⑦半乳糖血症患者禁用。'
-          },
-          {
-            name: '能全素（整蛋白型肠内营养剂）',
-            brand: '纽迪希亚',
-            type: '粉剂',
-            disease: '消化吸收障碍, 术后, 肿瘤, 糖尿病',
-            protein: '整蛋白',
-            osmolality: '415',
-            contraindication: '①肠道功能衰竭患者禁用；\n②完全性肠道梗阻患者禁用；\n③严重腹腔内感染者禁用；\n④对本品中任一成分过敏的患者禁用；\n⑤对本品中任一成分有先天性代谢障碍的患者禁用；\n⑥顽固性腹泻等需要进行肠道休息处理的患者禁用。'
-          },
-          {
-            name: '百普素（短肽型肠内营养剂）',
-            brand: '纽迪希亚',
-            type: '粉剂',
-            disease: '消化吸收障碍, 术后, 肿瘤, 糖尿病',
-            protein: '短肽',
-            osmolality: '405',
-            contraindication: '①肠道功能衰竭患者禁用；\n②完全性肠道梗阻患者禁用；\n③严重腹腔内感染患者禁用；\n④对本品中任一成份过敏的患者禁用；\n⑤对本品中任一成份有先天性代谢障碍的患者禁用；\n⑥顽固性腹泻等需要进行肠道休息处理的患者禁用；\n⑦半乳糖血症患者禁用。'
-          },
-          {
-            name: '能全力（肠内营养混悬液TPF）',
-            brand: '纽迪希亚',
-            type: '液体',
-            disease: '术后, 肿瘤, 糖尿病, 卒中, 其他',
-            protein: '整蛋白',
-            osmolality: '188',
-            contraindication: '严禁静脉输注；完全性胃肠道梗阻、顽固性呕吐、严重消化吸收衰竭者禁用；对本品任一成分过敏者禁用'
-          },
-          {
-            name: '佳膳优选全营养配方粉',
-            brand: '雀巢',
-            type: '粉剂',
-            disease: '术后, 肿瘤, 卒中, COPD',
-            protein: '整蛋白',
-            osmolality: '380',
-            contraindication: '牛奶蛋白过敏者禁用；严禁静脉输注。'
-          },
-          {
-            name: '佰态能特殊医学用途全营养配方食品',
-            brand: '雀巢',
-            type: '液体',
-            disease: '术后, 消化吸收障碍, 肿瘤, COPD, 其他',
-            protein: '短肽',
-            osmolality: '330',
-            contraindication: '禁止静脉输注；肠外营养支持者禁用；牛乳蛋白严重过敏者禁用。'
-          },
-          {
-            name: '伊力佳（肠内营养混悬液TPF-D）',
-            brand: '雅培',
-            type: '液体',
-            disease: '糖尿病, 术后, 卒中, 其他',
-            protein: '整蛋白',
-            osmolality: '325',
-            contraindication: '不能经口/肠内喂养者禁用；牛奶蛋白过敏、半乳糖血症患者禁用；严禁静脉输注。'
-          },
-          {
-            name: '佳维体（肠内营养混悬液TPF-FOS）',
-            brand: '雅培',
-            type: '液体',
-            disease: '术后, 肿瘤, 卒中, COPD, 其他',
-            protein: '整蛋白',
-            osmolality: '320',
-            contraindication: '肠梗阻患者禁用；牛奶蛋白、半乳糖血症患者禁用；禁止静脉输注。'
-          },
-          {
-            name: '安素（肠内营养粉剂TP）',
-            brand: '雅培',
-            type: '粉剂',
-            disease: '术后, 肿瘤, 卒中, COPD, 其他',
-            protein: '整蛋白',
-            osmolality: '379',
-            contraindication: '1. 对本品中任何成份过敏者禁用。\n2. 本品禁用于不能口服或肠内进食的情况，包括肠梗阻，严重的短肠综合征或高排泄量的瘘管。\n3. 本品禁用于半乳糖血症患者。\n4. 本品禁用于对牛奶和大豆蛋白过敏者。\n5. 处于孕期前 3 个月的孕妇或者计划怀孕的妇女，日剂量不得超过 1 罐（400g）（参见【孕妇及哺乳期妇女用药】）。'
-          }
-        ];
-
+// ===== 餐盘生成器 =====
         (function() {
-          var filter = document.getElementById('diseaseFilter');
-          var grid = document.getElementById('fsProductGrid');
-          var countLabel = document.getElementById('fsCountLabel');
+            // 状态
+            var selections = { goal: null, meal: null, activity: null };
 
-          function render(disease) {
-            var filtered;
-            if (disease === '全部') {
-              filtered = productData;
-            } else {
-              filtered = [];
-              for (var i = 0; i < productData.length; i++) {
-                if (productData[i].disease.indexOf(disease) !== -1) {
-                  filtered.push(productData[i]);
+            // DOM 引用
+            var optionBtns = document.querySelectorAll('#tab-plate .plate-option-btn');
+            var hints = {
+                goal: document.querySelector('[data-hint="goal"]'),
+                meal: document.querySelector('[data-hint="meal"]'),
+                activity: document.querySelector('[data-hint="activity"]')
+            };
+            var summaryBar = document.getElementById('plateSummary');
+            var generateBtn = document.getElementById('generateBtn');
+            var resultArea = document.getElementById('plateResult');
+            var profileCard = document.getElementById('profileCard');
+            var profileStats = document.getElementById('profileStats');
+            var quickUseBtn = document.getElementById('quickUseBtn');
+
+            // 热量表（仅在无用户画像时使用）
+            var CALORIE_TABLE = {
+                '久坐为主': { '减重': 1500, '增肌': 2200, '保持现状': 1800 },
+                '偶尔运动': { '减重': 1600, '增肌': 2400, '保持现状': 2000 },
+                '经常运动': { '减重': 1700, '增肌': 2600, '保持现状': 2200 }
+            };
+
+            // 宏量营养素供能比
+            var MACRO_RATIOS = {
+                '减重': { carbs: 0.40, protein: 0.30, fat: 0.30 },
+                '增肌': { carbs: 0.45, protein: 0.30, fat: 0.25 },
+                '保持现状': { carbs: 0.50, protein: 0.20, fat: 0.30 }
+            };
+
+            // 餐单替换建议
+            var SWAP_TIPS = {
+                '早餐': [
+                    '把包子换成全麦三明治',
+                    '加一颗水煮蛋',
+                    '把甜豆浆换成无糖豆浆'
+                ],
+                '午餐': [
+                    '把白米饭换成杂粮饭',
+                    '加一份清炒时蔬',
+                    '把红烧肉换成清蒸鱼'
+                ],
+                '晚餐': [
+                    '减少一半主食，增加蔬菜',
+                    '把炒菜换成凉拌菜',
+                    '用豆腐替代部分肉类'
+                ]
+            };
+
+            // 食物数据直接引用全局 FOOD_DATA，由 selectMealFoods 动态筛选
+
+            // ===== 更新用户画像提示卡 =====
+            function updateProfileCard() {
+                if (window.userProfile) {
+                    var p = window.userProfile;
+                    var statsHtml = ''
+                        + '<span class="profile-stat">每日热量：<span class="stat-value">' + p.tdee + ' kcal</span></span>'
+                        + '<span class="profile-stat">蛋白质：<span class="stat-value">' + p.proteinRange[0] + '~' + p.proteinRange[1] + 'g</span></span>'
+                        + '<span class="profile-stat">碳水：<span class="stat-value">' + p.carbsRange[0] + '~' + p.carbsRange[1] + 'g</span></span>'
+                        + '<span class="profile-stat">脂肪：<span class="stat-value">' + p.fatRange[0] + '~' + p.fatRange[1] + 'g</span></span>';
+                    profileStats.innerHTML = statsHtml;
+                    profileCard.style.display = 'block';
+                    quickUseBtn.style.display = 'block';
+                } else {
+                    profileCard.style.display = 'none';
+                    quickUseBtn.style.display = 'none';
                 }
-              }
             }
 
-            countLabel.textContent = '共 ' + filtered.length + ' 款产品';
+            // 页面加载时检查
+            updateProfileCard();
 
-            if (filtered.length === 0) {
-              grid.innerHTML = '<div class="fs-empty">暂未收录匹配产品</div>';
-              return;
+            // ===== 选项点击事件 =====
+            optionBtns.forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var group = this.parentElement;
+                    var question = group.getAttribute('data-question');
+                    var value = this.getAttribute('data-value');
+
+                    // 同组取消选中，当前按钮选中
+                    group.querySelectorAll('.plate-option-btn').forEach(function(b) {
+                        b.classList.remove('selected');
+                    });
+                    this.classList.add('selected');
+
+                    // 更新状态
+                    selections[question] = value;
+
+                    // 更新提示文字
+                    if (hints[question]) {
+                        hints[question].textContent = value;
+                        hints[question].classList.add('has-value');
+                    }
+
+                    // 更新摘要
+                    updateSummary();
+
+                    // 隐藏已有结果（用户修改选项后自动隐藏）
+                    resultArea.classList.remove('visible');
+                });
+            });
+
+            // ===== 更新摘要 =====
+            function updateSummary() {
+                var goal = selections.goal || '未选';
+                var meal = selections.meal || '未选';
+                var activity = selections.activity || '未选';
+
+                summaryBar.innerHTML = '目标：<span class="highlight">' + goal + '</span>'
+                    + ' | 凑合餐：<span class="highlight">' + meal + '</span>'
+                    + ' | 活动：<span class="highlight">' + activity + '</span>';
+
+                // 全部选完后启用生成按钮
+                var allSelected = selections.goal && selections.meal && selections.activity;
+                generateBtn.disabled = !allSelected;
             }
 
-            var html = '';
-            for (var j = 0; j < filtered.length; j++) {
-              var p = filtered[j];
-              var hasWarning = p.contraindication && p.contraindication !== '无';
-              var warningHtml = hasWarning
-                ? '<div class="fs-warning">⚠ ' + p.contraindication.replace(/\n/g, '<br>') + '</div>'
-                : '';
+            // ===== Chart.js 实例 =====
+            var plateChartInstance = null;
 
-              html += '<div class="fs-card">'
-                + '<h3>' + p.name + '</h3>'
-                + '<div class="fs-meta">'
-                + '<span><span class="fs-label">品牌</span> ' + p.brand + '</span><br>'
-                + '<span><span class="fs-label">剂型</span> ' + p.type + '</span>'
-                + '<span><span class="fs-label">蛋白质</span> ' + p.protein + '</span>'
-                + '<span><span class="fs-label">渗透压</span> ' + p.osmolality + ' mOsm/L</span>'
-                + '</div>'
-                + warningHtml
-                + '</div>';
+            // ===== 生成餐盘（核心函数） =====
+            function generatePlate(useProfile) {
+                var goal = selections.goal;
+                var meal = selections.meal;
+                var activity = selections.activity;
+
+                // 1. 计算全天总量
+                var kcal;
+                if (useProfile && window.userProfile) {
+                    kcal = window.userProfile.tdee;
+                } else {
+                    kcal = CALORIE_TABLE[activity][goal];
+                }
+                var ratios = MACRO_RATIOS[goal];
+                var carbsG = Math.round(kcal * ratios.carbs / 4);
+                var proteinG = Math.round(kcal * ratios.protein / 4);
+                var fatG = Math.round(kcal * ratios.fat / 9);
+
+                // 2. 渲染环形图
+                var ctx = document.getElementById('plateChart');
+                if (plateChartInstance) {
+                    plateChartInstance.destroy();
+                }
+                plateChartInstance = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['碳水化合物', '蛋白质', '脂肪'],
+                        datasets: [{
+                            data: [ratios.carbs * 100, ratios.protein * 100, ratios.fat * 100],
+                            backgroundColor: ['#E88A5A', '#7BAF7A', '#B39DDB'],
+                            borderWidth: 0,
+                            hoverOffset: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        cutout: '55%',
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    padding: 14,
+                                    usePointStyle: true,
+                                    pointStyle: 'circle',
+                                    font: { size: 13, family: '-apple-system, "PingFang SC", "Microsoft YaHei", sans-serif' },
+                                    color: '#2d3436'
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.label + ': ' + context.parsed + '%';
+                                    }
+                                },
+                                backgroundColor: 'rgba(45,52,54,0.85)',
+                                padding: 10,
+                                cornerRadius: 8
+                            }
+                        },
+                        animation: {
+                            animateRotate: true,
+                            duration: 800
+                        }
+                    }
+                });
+
+                // 3. 渲染全天克数详情
+                var detailHtml = ''
+                    + '<div class="plate-macro-item">'
+                        + '<span class="macro-color-dot" style="background:#E88A5A"></span>'
+                        + '<span class="macro-name">碳水</span>'
+                        + '<div class="macro-gram">' + carbsG + 'g</div>'
+                        + '<div class="macro-pct">' + Math.round(ratios.carbs * 100) + '%</div>'
+                    + '</div>'
+                    + '<div class="plate-macro-item">'
+                        + '<span class="macro-color-dot" style="background:#7BAF7A"></span>'
+                        + '<span class="macro-name">蛋白质</span>'
+                        + '<div class="macro-gram">' + proteinG + 'g</div>'
+                        + '<div class="macro-pct">' + Math.round(ratios.protein * 100) + '%</div>'
+                    + '</div>'
+                    + '<div class="plate-macro-item">'
+                        + '<span class="macro-color-dot" style="background:#B39DDB"></span>'
+                        + '<span class="macro-name">脂肪</span>'
+                        + '<div class="macro-gram">' + fatG + 'g</div>'
+                        + '<div class="macro-pct">' + Math.round(ratios.fat * 100) + '%</div>'
+                    + '</div>'
+                    + '<div style="width:100%;text-align:center;font-size:13px;color:#636e72;margin-top:6px;">'
+                        + '每日参考热量：' + kcal + ' kcal</div>';
+                document.getElementById('plateMacroDetail').innerHTML = detailHtml;
+
+                // 4. 三餐分配（30%/40%/30%）
+                var MEAL_SPLIT = { '早餐': 0.30, '午餐': 0.40, '晚餐': 0.30 };
+                var mealNames = ['早餐', '午餐', '晚餐'];
+
+                // 5. 为每餐筛选并渲染食物
+                mealNames.forEach(function(name, idx) {
+                    var pct = MEAL_SPLIT[name];
+                    var mKcal  = Math.round(kcal * pct);
+                    var mCarbs = Math.round(carbsG * pct);
+                    var mProt  = Math.round(proteinG * pct);
+                    var mFat   = Math.round(fatG * pct);
+
+                    // 更新摘要
+                    document.getElementById(name + 'Summary').textContent
+                        = '≈' + mKcal + 'kcal | 碳水' + mCarbs + 'g 蛋白' + mProt + 'g 脂肪' + mFat + 'g';
+
+                    // 高亮凑合餐
+                    var cardEl = document.getElementById('meal' + name);
+                    cardEl.className = 'meal-card' + (name === meal ? ' highlight' : '');
+
+                    // 筛选食物
+                    var foods = selectMealFoods(name, goal, mCarbs, mProt, idx);
+
+                    // 渲染食物列表
+                    var bodyHtml = '';
+                    foods.forEach(function(item) {
+                        var f = item.food;
+                        var sv = item.serving;
+                        var itemKcal = Math.round(f.kcal * sv / 100);
+                        var itemProt = Math.round(f.protein * sv / 100 * 10) / 10;
+                        bodyHtml += '<div class="meal-food-item">'
+                            + '<span class="food-dot ' + item.cat + '"></span>'
+                            + '<span class="food-info">'
+                                + '<span class="food-name">' + f.name + '</span>'
+                                + '<span class="food-nutrition"> ' + sv + 'g | ' + itemKcal + 'kcal | 蛋白质' + itemProt + 'g</span>'
+                            + '</span>'
+                            + '</div>';
+                    });
+                    document.getElementById(name + 'Body').innerHTML = bodyHtml;
+                });
+
+                // 6. 凑合餐替换建议
+                var swapContainer = document.getElementById('plateSwapContainer');
+                if (meal === '都还行') {
+                    swapContainer.innerHTML = '<div class="plate-swap-all-good">✅ 三餐搭配都比较均衡，保持即可！</div>';
+                } else {
+                    var tips = SWAP_TIPS[meal];
+                    var swapHtml = '<ul class="plate-swap-list">';
+                    tips.forEach(function(tip) {
+                        swapHtml += '<li class="plate-swap-item">'
+                            + '<span class="swap-icon">✓</span>'
+                            + '<span>' + tip + '</span>'
+                            + '</li>';
+                    });
+                    swapHtml += '</ul>';
+                    swapContainer.innerHTML = swapHtml;
+                }
+                document.getElementById('swapSection').style.display = 'block';
+
+                // 7. 显示结果
+                resultArea.classList.remove('visible');
+                void resultArea.offsetWidth;
+                resultArea.classList.add('visible');
+
+                setTimeout(function() {
+                    resultArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 150);
             }
-            grid.innerHTML = html;
-          }
 
-          filter.addEventListener('change', function() {
-            render(this.value);
-          });
+            // ===== 食物筛选函数（从数据库智能选取） =====
+            function selectMealFoods(mealName, goal, targetCarbs, targetProtein, mealIndex) {
+                var result = [];
+                var usedNames = {};
 
-          render('全部');
+                function getByCat(catCls) {
+                    var list = [];
+                    for (var i = 0; i < FOOD_DATA.length; i++) {
+                        if (FOOD_DATA[i].catCls === catCls) {
+                            list.push(FOOD_DATA[i]);
+                        }
+                    }
+                    return list;
+                }
+
+                function sortByGoal(list) {
+                    var sorted = list.slice();
+                    if (goal === '减重') {
+                        sorted.sort(function(a, b) { return a.kcal - b.kcal; });
+                    } else if (goal === '增肌') {
+                        sorted.sort(function(a, b) { return b.protein - a.protein; });
+                    }
+                    return sorted;
+                }
+
+                function pickOne(catCls, preferredKey) {
+                    var candidates = sortByGoal(getByCat(catCls));
+                    if (preferredKey) {
+                        for (var i = 0; i < candidates.length; i++) {
+                            if (candidates[i].name.indexOf(preferredKey) !== -1 && !usedNames[candidates[i].name]) {
+                                usedNames[candidates[i].name] = true;
+                                return candidates[i];
+                            }
+                        }
+                    }
+                    for (var i = 0; i < candidates.length; i++) {
+                        if (!usedNames[candidates[i].name]) {
+                            usedNames[candidates[i].name] = true;
+                            return candidates[i];
+                        }
+                    }
+                    return candidates[0];
+                }
+
+                var offset = mealIndex * 3;
+
+                // --- 主食：提供约65%的碳水需求 ---
+                var carbNeed = Math.round(targetCarbs * 0.65);
+                var staplePrefs = ['米饭', '馒头', '面条', '红薯', '玉米', '燕麦', '全麦'];
+                var staple = pickOne('staple', staplePrefs[offset % staplePrefs.length]);
+                var stapleServing = Math.round(carbNeed / (staple.carbs / 100));
+                stapleServing = Math.max(80, Math.min(350, stapleServing));
+                result.push({ food: staple, serving: stapleServing, cat: 'staple' });
+
+                // --- 蛋白质：提供约85%的蛋白质需求 ---
+                var protNeed = Math.round(targetProtein * 0.85);
+                var protPrefs = ['鸡胸肉', '鸡蛋', '牛肉', '鱼', '虾', '豆腐'];
+                var protein = pickOne('meat', protPrefs[offset % protPrefs.length]);
+                var protServing = Math.round(protNeed / (protein.protein / 100));
+                protServing = Math.max(50, Math.min(300, protServing));
+                result.push({ food: protein, serving: protServing, cat: 'meat' });
+
+                // --- 蔬菜：固定180g ---
+                var vegPrefs = ['西兰花', '菠菜', '西红柿', '黄瓜', '白菜', '生菜'];
+                var veg = pickOne('veg', vegPrefs[offset % vegPrefs.length]);
+                result.push({ food: veg, serving: 180, cat: 'veg' });
+
+                // --- 早餐额外加一份水果 ---
+                if (mealName === '早餐') {
+                    var fruitPrefs = ['苹果', '香蕉', '橙子', '蓝莓', '猕猴桃'];
+                    var fruit = pickOne('fruit', fruitPrefs[offset % fruitPrefs.length]);
+                    result.push({ food: fruit, serving: 150, cat: 'fruit' });
+                }
+
+                return result;
+            }
+
+            // ===== 生成按钮点击 =====
+            generateBtn.addEventListener('click', function() {
+                if (this.disabled) return;
+                generatePlate(false);
+            });
+
+            // ===== 快捷按钮点击 =====
+            quickUseBtn.addEventListener('click', function() {
+                if (!window.userProfile) return;
+
+                // 根据BMI自动确定目标
+                var bmi = window.userProfile.bmi;
+                var goal;
+                if (bmi < 18.5) {
+                    goal = '增肌';
+                } else if (bmi >= 24) {
+                    goal = '减重';
+                } else {
+                    goal = '保持现状';
+                }
+
+                // 自动选择选项
+                selections.goal = goal;
+                selections.meal = '午餐';
+                selections.activity = '偶尔运动';
+
+                // 更新UI按钮状态
+                document.querySelectorAll('[data-question="goal"] .plate-option-btn').forEach(function(b) {
+                    b.classList.toggle('selected', b.getAttribute('data-value') === goal);
+                });
+                document.querySelectorAll('[data-question="meal"] .plate-option-btn').forEach(function(b) {
+                    b.classList.toggle('selected', b.getAttribute('data-value') === '午餐');
+                });
+                document.querySelectorAll('[data-question="activity"] .plate-option-btn').forEach(function(b) {
+                    b.classList.toggle('selected', b.getAttribute('data-value') === '偶尔运动');
+                });
+
+                // 更新提示文字
+                hints.goal.textContent = goal;
+                hints.goal.classList.add('has-value');
+                hints.meal.textContent = '午餐';
+                hints.meal.classList.add('has-value');
+                hints.activity.textContent = '偶尔运动';
+                hints.activity.classList.add('has-value');
+
+                // 更新摘要
+                updateSummary();
+
+                // 使用画像数据生成
+                generatePlate(true);
+            });
         })();
 
 // ===== 标签页切换 =====
@@ -1969,6 +2889,26 @@
                 var tabId = 'tab-' + this.getAttribute('data-tab');
                 tabs.forEach(function(t) { t.classList.remove('active'); });
                 document.getElementById(tabId).classList.add('active');
+
+                // 切换到餐盘生成器时检查用户画像
+                if (tabId === 'tab-plate') {
+                    var pc = document.getElementById('profileCard');
+                    var qu = document.getElementById('quickUseBtn');
+                    var ps = document.getElementById('profileStats');
+                    if (window.userProfile && pc && ps) {
+                        var p = window.userProfile;
+                        ps.innerHTML = ''
+                            + '<span class="profile-stat">每日热量：<span class="stat-value">' + p.tdee + ' kcal</span></span>'
+                            + '<span class="profile-stat">蛋白质：<span class="stat-value">' + p.proteinRange[0] + '~' + p.proteinRange[1] + 'g</span></span>'
+                            + '<span class="profile-stat">碳水：<span class="stat-value">' + p.carbsRange[0] + '~' + p.carbsRange[1] + 'g</span></span>'
+                            + '<span class="profile-stat">脂肪：<span class="stat-value">' + p.fatRange[0] + '~' + p.fatRange[1] + 'g</span></span>';
+                        pc.style.display = 'block';
+                        if (qu) qu.style.display = 'block';
+                    } else {
+                        if (pc) pc.style.display = 'none';
+                        if (qu) qu.style.display = 'none';
+                    }
+                }
             });
         });
 
