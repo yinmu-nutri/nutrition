@@ -1629,32 +1629,8 @@
         </div>
     </div>
 
-    <!-- 食物热量速查表 -->
-    <details class="card food-details">
-        <summary class="food-summary">📊 食物热量速查表 <span class="food-count" id="foodCount">65</span></summary>
-        <div class="food-content">
-            <input type="text" class="food-search" id="foodSearch" placeholder="输入食物名称搜索..." autocomplete="off">
-            <div class="food-table-wrap">
-                <table class="food-table">
-                    <thead>
-                        <tr>
-                            <th>分类</th>
-                            <th>食物名称</th>
-                            <th>热量<br><small>(kcal/100g)</small></th>
-                            <th>碳水(g)</th>
-                            <th>蛋白质(g)</th>
-                            <th>脂肪(g)</th>
-                        </tr>
-                    </thead>
-                    <tbody id="foodTableBody"></tbody>
-                </table>
-            </div>
-            <div class="food-empty" id="foodEmpty">未找到匹配的食物</div>
-        </div>
-    </details>
-</div>
+    </div>
 
-<!-- ===== 标签页：餐盘生成器 ===== -->
 <div class="tab-content" id="tab-plate">
     <div class="app-title">
         <h1>餐盘生成器</h1>
@@ -1761,6 +1737,30 @@
             <h3>餐单替换建议</h3>
             <div id="plateSwapContainer"></div>
         </div>
+
+        <!-- 食物热量速查表（可折叠） -->
+        <details class="card food-details">
+            <summary class="food-summary">📊 食物热量速查表 <span class="food-count" id="foodCount">150</span></summary>
+            <div class="food-content">
+                <input type="text" class="food-search" id="foodSearch" placeholder="输入食物名称搜索..." autocomplete="off">
+                <div class="food-table-wrap">
+                    <table class="food-table">
+                        <thead>
+                            <tr>
+                                <th>分类</th>
+                                <th>食物名称</th>
+                                <th>热量<br><small>(kcal/100g)</small></th>
+                                <th>碳水(g)</th>
+                                <th>蛋白质(g)</th>
+                                <th>脂肪(g)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="foodTableBody"></tbody>
+                    </table>
+                </div>
+                <div class="food-empty" id="foodEmpty">未找到匹配的食物</div>
+            </div>
+        </details>
     </div>
 </div>
 
@@ -2407,61 +2407,7 @@
             { name: '海苔',   cat: '零食', catCls: 'snack', kcal: 177, carbs: 24.0, protein: 29.0, fat: 3.5 },
         ];
 
-        /** 获取热量 CSS 类名 */
-        function calorieClass(kcal) {
-            if (kcal <= 50) return 'calorie-low';
-            if (kcal <= 150) return 'calorie-mid';
-            return 'calorie-high';
-        }
-
-        /** 渲染食物表格 */
-        function renderFoodTable(query) {
-            var tbody = document.getElementById('foodTableBody');
-            var empty = document.getElementById('foodEmpty');
-            var countEl = document.getElementById('foodCount');
-            if (!tbody) return;
-
-            var keyword = (query || '').trim().toLowerCase();
-            var filtered = keyword
-                ? FOOD_DATA.filter(function(item) { return item.name.indexOf(keyword) !== -1; })
-                : FOOD_DATA;
-
-            if (filtered.length === 0) {
-                tbody.innerHTML = '';
-                empty.style.display = 'block';
-                countEl.textContent = '0';
-                return;
-            }
-
-            empty.style.display = 'none';
-            countEl.textContent = filtered.length;
-
-            var html = '';
-            for (var i = 0; i < filtered.length; i++) {
-                var item = filtered[i];
-                html += '<tr>'
-                    + '<td><span class="food-category-tag ' + item.catCls + '">' + item.cat + '</span></td>'
-                    + '<td class="food-name">' + item.name + '</td>'
-                    + '<td class="' + calorieClass(item.kcal) + '">' + item.kcal + '</td>'
-                    + '<td>' + item.carbs + '</td>'
-                    + '<td>' + item.protein + '</td>'
-                    + '<td>' + item.fat + '</td>'
-                    + '</tr>';
-            }
-            tbody.innerHTML = html;
-        }
-
-        // 搜索框事件绑定
-        var foodSearch = document.getElementById('foodSearch');
-        if (foodSearch) {
-            foodSearch.addEventListener('input', function() {
-                renderFoodTable(this.value);
-            });
-        }
-
-        // 页面加载时渲染食物表格
-        renderFoodTable('');
-
+        
 // ===== 餐盘生成器 =====
         (function() {
             // 状态
@@ -2873,6 +2819,62 @@
                 // 使用画像数据生成
                 generatePlate(true);
             });
+
+            // ===== 食物热量速查表 =====
+            /** 获取热量 CSS 类名 */
+            function calorieClass(kcal) {
+                if (kcal <= 50) return 'calorie-low';
+                if (kcal <= 150) return 'calorie-mid';
+                return 'calorie-high';
+            }
+
+            /** 渲染食物表格 */
+            function renderFoodTable(query) {
+                var tbody = document.getElementById('foodTableBody');
+                var empty = document.getElementById('foodEmpty');
+                var countEl = document.getElementById('foodCount');
+                if (!tbody) return;
+
+                var keyword = (query || '').trim().toLowerCase();
+                var filtered = keyword
+                    ? FOOD_DATA.filter(function(item) { return item.name.indexOf(keyword) !== -1; })
+                    : FOOD_DATA;
+
+                if (filtered.length === 0) {
+                    tbody.innerHTML = '';
+                    empty.style.display = 'block';
+                    countEl.textContent = '0';
+                    return;
+                }
+
+                empty.style.display = 'none';
+                countEl.textContent = filtered.length;
+
+                var html = '';
+                for (var i = 0; i < filtered.length; i++) {
+                    var item = filtered[i];
+                    html += '<tr>'
+                        + '<td><span class="food-category-tag ' + item.catCls + '">' + item.cat + '</span></td>'
+                        + '<td class="food-name">' + item.name + '</td>'
+                        + '<td class="' + calorieClass(item.kcal) + '">' + item.kcal + '</td>'
+                        + '<td>' + item.carbs + '</td>'
+                        + '<td>' + item.protein + '</td>'
+                        + '<td>' + item.fat + '</td>'
+                        + '</tr>';
+                }
+                tbody.innerHTML = html;
+            }
+
+            // 搜索框事件绑定
+            var foodSearch = document.getElementById('foodSearch');
+            if (foodSearch) {
+                foodSearch.addEventListener('input', function() {
+                    renderFoodTable(this.value);
+                });
+            }
+
+            // 页面加载时渲染食物表格
+            renderFoodTable('');
         })();
 
 // ===== 标签页切换 =====
