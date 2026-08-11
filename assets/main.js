@@ -564,9 +564,8 @@
                 age: age,
                 gender: gender
             };
-        }
 
-        // ===== 事件绑定 =====
+            }
 
         calcBtn.addEventListener('click', runCalculation);
 
@@ -907,12 +906,13 @@
         (function() {
             // 状态
             var selections = { goal: null, meal: null, activity: null };
+            var sourceMode = 'system';
+            var targetMode = 'gram';
 
             // DOM 引用
             var optionBtns = document.querySelectorAll('#tab-plate .plate-option-btn');
             var hints = {
                 goal: document.querySelector('[data-hint="goal"]'),
-                meal: document.querySelector('[data-hint="meal"]'),
                 activity: document.querySelector('[data-hint="activity"]')
             };
             var summaryBar = document.getElementById('plateSummary');
@@ -920,7 +920,12 @@
             var resultArea = document.getElementById('plateResult');
             var profileCard = document.getElementById('profileCard');
             var profileStats = document.getElementById('profileStats');
-            var quickUseBtn = document.getElementById('quickUseBtn');
+            var sourceToggle = document.getElementById('sourceToggle');
+            var systemContent = document.getElementById('systemContent');
+            var customContent = document.getElementById('customContent');
+            var step1Panel = document.getElementById('step1Panel');
+            var targetModeBar = document.getElementById('targetModeBar');
+            var stepIndicator = document.querySelector('.step-indicator');
 
             // 热量表（仅在无用户画像时使用）
             var CALORIE_TABLE = {
@@ -938,24 +943,130 @@
 
             // 餐单替换建议
             var SWAP_TIPS = {
-                '早餐': [
-                    '把包子换成全麦三明治',
-                    '加一颗水煮蛋',
-                    '把甜豆浆换成无糖豆浆'
-                ],
-                '午餐': [
-                    '把白米饭换成杂粮饭',
-                    '加一份清炒时蔬',
-                    '把红烧肉换成清蒸鱼'
-                ],
-                '晚餐': [
-                    '减少一半主食，增加蔬菜',
-                    '把炒菜换成凉拌菜',
-                    '用豆腐替代部分肉类'
-                ]
+                '早餐': ['把包子换成全麦三明治', '加一颗水煮蛋', '把甜豆浆换成无糖豆浆'],
+                '午餐': ['把白米饭换成杂粮饭', '加一份清炒时蔬', '把红烧肉换成清蒸鱼'],
+                '晚餐': ['减少一半主食，增加蔬菜', '把炒菜换成凉拌菜', '用豆腐替代部分肉类']
             };
 
-            // 食物数据直接引用全局 FOOD_DATA，由 selectMealFoods 动态筛选
+            // ===== 单位换算 =====
+            function getTargetGrams(mode) {
+                var c = parseFloat(document.getElementById('targetCarbs').value) || 0;
+                var p = parseFloat(document.getElementById('targetProtein').value) || 0;
+                var f = parseFloat(document.getElementById('targetFat').value) || 0;
+                if (mode === 'gram') return { carbs: c, protein: p, fat: f };
+                var weight = parseFloat(document.getElementById('weight').value) || 0;
+                if (mode === 'perkg') return { carbs: Math.round(weight * c), protein: Math.round(weight * p), fat: Math.round(weight * f) };
+                var tdee = (window.userProfile && window.userProfile.tdee) || 2000;
+                return { carbs: Math.round(tdee * (c/100)/4), protein: Math.round(tdee * (p/100)/4), fat: Math.round(tdee * (f/100)/9) };
+            }
+            function gramsToPct(grams) {
+                var total = grams.carbs*4 + grams.protein*4 + grams.fat*9;
+                if (!total) return { carbs:0, protein:0, fat:0 };
+                return { carbs: Math.round(grams.carbs*4/total*100), protein: Math.round(grams.protein*4/total*100), fat: Math.round(grams.fat*9/total*100) };
+            }
+            function getKcal(grams) {
+                return grams.carbs*4 + grams.protein*4 + grams.fat*9;
+            }
+
+            // ===== 更新目标摘要 =====
+            function updateSummary() {
+                if (sourceMode === 'system') {
+                    if (selections.goal && selections.activity) {
+                        var kcal, ratios = MACRO_RATIOS[selections.goal];
+                        if (window.userProfile) {
+                            kcal = window.userProfile.tdee;
+                        } else {
+                            kcal = CALORIE_TABLE[selections.activity][selections.goal];
+                        }
+                        var c = Math.round(kcal * ratios.carbs / 4);
+                        var p = Math.round(kcal * ratios.protein / 4);
+                        var f = Math.round(kcal * ratios.fat / 9);
+                        summaryBar.innerHTML = '推荐目标：<span class="highlight">' + kcal + ' kcal</span> | '
+                            + '碳水 <span class="highlight">' + c + 'g</span> · '
+                            + '蛋白质 <span class="highlight">' + p + 'g</span> · '
+                            + '脂肪 <span class="highlight">' + f + 'g</span>';
+                        generateBtn.disabled = false;
+                    } else {
+                        summaryBar.textContent = '请选择目标和活动水平';
+                        generateBtn.disabled = true;
+                    }
+                } else {
+                    var grams = getTargetGrams(targetMode);
+                    if (grams.carbs || grams.protein || grams.fat) {
+                        var kcal = getKcal(grams);
+                        var pct = gramsToPct(grams);
+                        summaryBar.innerHTML = '自定义目标：<span class="highlight">' + kcal + ' kcal</span> | '
+                            + '碳水 <span class="highlight">' + grams.carbs + 'g</span> (' + pct.carbs + '%) · '
+                            + '蛋白质 <span class="highlight">' + grams.protein + 'g</span> (' + pct.protein + '%) · '
+                            + '脂肪 <span class="highlight">' + grams.fat + 'g</span> (' + pct.fat + '%)';
+                        generateBtn.disabled = false;
+                    } else {
+                        summaryBar.textContent = '请输入自定义营养素目标';
+                        generateBtn.disabled = true;
+                    }
+                }
+            }
+
+            // ===== 更新输入框单位 =====
+            function updateTargetInputs(mode) {
+                var units = ['carbsUnit','proteinUnit','fatUnit'].map(function(id){ return document.getElementById(id); });
+                var inputs = ['targetCarbs','targetProtein','targetFat'].map(function(id){ return document.getElementById(id); });
+                var label = mode === 'gram' ? '克数' : mode === 'pct' ? '百分比' : 'g/kg';
+                var unit = mode === 'gram' ? 'g' : mode === 'pct' ? '%' : 'g/kg';
+                units.forEach(function(el){ el.textContent = unit; });
+                inputs.forEach(function(el){ el.placeholder = label; });
+            }
+
+            // ===== 来源切换 =====
+            if (sourceToggle) {
+                sourceToggle.addEventListener('click', function(e) {
+                    var btn = e.target.closest('.source-btn');
+                    if (!btn) return;
+                    sourceToggle.querySelectorAll('.source-btn').forEach(function(b){ b.classList.remove('active'); });
+                    btn.classList.add('active');
+                    sourceMode = btn.getAttribute('data-source');
+                    systemContent.style.display = sourceMode === 'system' ? 'block' : 'none';
+                    customContent.style.display = sourceMode === 'custom' ? 'block' : 'none';
+                    updateSummary();
+                });
+            }
+
+            // ===== 自定义模式切换 =====
+            if (targetModeBar) {
+                targetModeBar.addEventListener('click', function(e) {
+                    var btn = e.target.closest('.target-mode-btn');
+                    if (!btn) return;
+                    targetModeBar.querySelectorAll('.target-mode-btn').forEach(function(b){ b.classList.remove('active'); });
+                    btn.classList.add('active');
+                    targetMode = btn.getAttribute('data-mode');
+                    updateTargetInputs(targetMode);
+                    updateSummary();
+                });
+            }
+
+            // ===== 自定义输入实时更新摘要 =====
+            ['targetCarbs','targetProtein','targetFat'].forEach(function(id) {
+                var el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener('input', function() {
+                        if (sourceMode === 'custom') updateSummary();
+                    });
+                }
+            });
+
+            // ===== 生成餐盘 =====
+            if (generateBtn) {
+                generateBtn.addEventListener('click', function() {
+                    if (this.disabled) return;
+                    selections.meal = '午餐';
+                    if (stepIndicator) {
+                        stepIndicator.querySelectorAll('.step-item').forEach(function(s, i) {
+                            s.classList.toggle('active', i === 1);
+                        });
+                    }
+                    generatePlate(!!window.userProfile);
+                });
+            }
 
             // ===== 更新用户画像提示卡 =====
             function updateProfileCard() {
@@ -968,60 +1079,37 @@
                         + '<span class="profile-stat">脂肪：<span class="stat-value">' + p.fatRange[0] + '~' + p.fatRange[1] + 'g</span></span>';
                     profileStats.innerHTML = statsHtml;
                     profileCard.style.display = 'block';
-                    quickUseBtn.style.display = 'block';
                 } else {
                     profileCard.style.display = 'none';
-                    quickUseBtn.style.display = 'none';
                 }
             }
 
-            // 页面加载时检查
-            updateProfileCard();
-
-            // ===== 选项点击事件 =====
+            // ===== 选项按钮点击 =====
             optionBtns.forEach(function(btn) {
                 btn.addEventListener('click', function() {
                     var group = this.parentElement;
                     var question = group.getAttribute('data-question');
                     var value = this.getAttribute('data-value');
 
-                    // 同组取消选中，当前按钮选中
                     group.querySelectorAll('.plate-option-btn').forEach(function(b) {
                         b.classList.remove('selected');
                     });
                     this.classList.add('selected');
 
-                    // 更新状态
                     selections[question] = value;
 
-                    // 更新提示文字
                     if (hints[question]) {
                         hints[question].textContent = value;
                         hints[question].classList.add('has-value');
                     }
 
-                    // 更新摘要
-                    updateSummary();
+                    if (question === 'goal' || question === 'activity') {
+                        if (sourceMode === 'system') updateSummary();
+                    }
 
-                    // 隐藏已有结果（用户修改选项后自动隐藏）
                     resultArea.classList.remove('visible');
                 });
             });
-
-            // ===== 更新摘要 =====
-            function updateSummary() {
-                var goal = selections.goal || '未选';
-                var meal = selections.meal || '未选';
-                var activity = selections.activity || '未选';
-
-                summaryBar.innerHTML = '目标：<span class="highlight">' + goal + '</span>'
-                    + ' | 凑合餐：<span class="highlight">' + meal + '</span>'
-                    + ' | 活动：<span class="highlight">' + activity + '</span>';
-
-                // 全部选完后启用生成按钮
-                var allSelected = selections.goal && selections.meal && selections.activity;
-                generateBtn.disabled = !allSelected;
-            }
 
             // ===== Chart.js 实例 =====
             var plateChartInstance = null;
@@ -1033,18 +1121,34 @@
                 var activity = selections.activity;
 
                 // 1. 计算全天总量
-                var kcal;
-                if (useProfile && window.userProfile) {
+                var kcal, carbsG, proteinG, fatG;
+
+                if (sourceMode === 'custom') {
+                    var g = getTargetGrams(targetMode);
+                    carbsG = g.carbs;
+                    proteinG = g.protein;
+                    fatG = g.fat;
+                    kcal = getKcal(g);
+                } else if (useProfile && window.userProfile) {
                     kcal = window.userProfile.tdee;
+                    var ratios = MACRO_RATIOS[goal];
+                    carbsG = Math.round(kcal * ratios.carbs / 4);
+                    proteinG = Math.round(kcal * ratios.protein / 4);
+                    fatG = Math.round(kcal * ratios.fat / 9);
                 } else {
                     kcal = CALORIE_TABLE[activity][goal];
+                    var ratios = MACRO_RATIOS[goal];
+                    carbsG = Math.round(kcal * ratios.carbs / 4);
+                    proteinG = Math.round(kcal * ratios.protein / 4);
+                    fatG = Math.round(kcal * ratios.fat / 9);
                 }
-                var ratios = MACRO_RATIOS[goal];
-                var carbsG = Math.round(kcal * ratios.carbs / 4);
-                var proteinG = Math.round(kcal * ratios.protein / 4);
-                var fatG = Math.round(kcal * ratios.fat / 9);
 
                 // 2. 渲染环形图
+                var totalG = carbsG + proteinG + fatG;
+                var cpct = totalG ? Math.round(carbsG / totalG * 100) : 0;
+                var ppct = totalG ? Math.round(proteinG / totalG * 100) : 0;
+                var fpct = totalG ? Math.round(fatG / totalG * 100) : 0;
+
                 var ctx = document.getElementById('plateChart');
                 if (plateChartInstance) {
                     plateChartInstance.destroy();
@@ -1054,7 +1158,7 @@
                     data: {
                         labels: ['碳水化合物', '蛋白质', '脂肪'],
                         datasets: [{
-                            data: [ratios.carbs * 100, ratios.protein * 100, ratios.fat * 100],
+                            data: [cpct, ppct, fpct],
                             backgroundColor: ['#E88A5A', '#7BAF7A', '#B39DDB'],
                             borderWidth: 0,
                             hoverOffset: 8
@@ -1097,21 +1201,21 @@
                 var detailHtml = ''
                     + '<div class="plate-macro-item">'
                         + '<span class="macro-color-dot" style="background:#E88A5A"></span>'
-                        + '<span class="macro-name">碳水</span>'
+                        + '<span class="macro-name">碳水化合物</span>'
                         + '<div class="macro-gram">' + carbsG + 'g</div>'
-                        + '<div class="macro-pct">' + Math.round(ratios.carbs * 100) + '%</div>'
+                        + '<div class="macro-pct">' + cpct + '%</div>'
                     + '</div>'
                     + '<div class="plate-macro-item">'
                         + '<span class="macro-color-dot" style="background:#7BAF7A"></span>'
                         + '<span class="macro-name">蛋白质</span>'
                         + '<div class="macro-gram">' + proteinG + 'g</div>'
-                        + '<div class="macro-pct">' + Math.round(ratios.protein * 100) + '%</div>'
+                        + '<div class="macro-pct">' + ppct + '%</div>'
                     + '</div>'
                     + '<div class="plate-macro-item">'
                         + '<span class="macro-color-dot" style="background:#B39DDB"></span>'
                         + '<span class="macro-name">脂肪</span>'
                         + '<div class="macro-gram">' + fatG + 'g</div>'
-                        + '<div class="macro-pct">' + Math.round(ratios.fat * 100) + '%</div>'
+                        + '<div class="macro-pct">' + fpct + '%</div>'
                     + '</div>'
                     + '<div style="width:100%;text-align:center;font-size:13px;color:#636e72;margin-top:6px;">'
                         + '每日参考热量：' + kcal + ' kcal</div>';
@@ -1129,18 +1233,14 @@
                     var mProt  = Math.round(proteinG * pct);
                     var mFat   = Math.round(fatG * pct);
 
-                    // 更新摘要
                     document.getElementById(name + 'Summary').textContent
                         = '≈' + mKcal + 'kcal | 碳水' + mCarbs + 'g 蛋白' + mProt + 'g 脂肪' + mFat + 'g';
 
-                    // 高亮凑合餐
                     var cardEl = document.getElementById('meal' + name);
                     cardEl.className = 'meal-card' + (name === meal ? ' highlight' : '');
 
-                    // 筛选食物
                     var foods = selectMealFoods(name, goal, mCarbs, mProt, idx);
 
-                    // 渲染食物列表
                     var bodyHtml = '';
                     foods.forEach(function(item) {
                         var f = item.food;
@@ -1148,8 +1248,8 @@
                         var itemKcal = Math.round(f.kcal * sv / 100);
                         var itemProt = Math.round(f.protein * sv / 100 * 10) / 10;
                         bodyHtml += '<div class="meal-food-item">'
-                            + '<span class="food-dot ' + item.cat + '"></span>'
-                            + '<span class="food-info">'
+                            + '<span class="dot ' + item.cat + '"></span>'
+                            + '<span class="info">'
                                 + '<span class="food-name">' + f.name + '</span>'
                                 + '<span class="food-nutrition"> ' + sv + 'g | ' + itemKcal + 'kcal | 蛋白质' + itemProt + 'g</span>'
                             + '</span>'
@@ -1186,7 +1286,7 @@
                 }, 150);
             }
 
-            // ===== 食物筛选函数（从数据库智能选取） =====
+            // ===== 食物筛选函数 =====
             function selectMealFoods(mealName, goal, targetCarbs, targetProtein, mealIndex) {
                 var result = [];
                 var usedNames = {};
@@ -1232,7 +1332,7 @@
 
                 var offset = mealIndex * 3;
 
-                // --- 主食：提供约65%的碳水需求 ---
+                // 主食：提供约65%的碳水需求
                 var carbNeed = Math.round(targetCarbs * 0.65);
                 var staplePrefs = ['米饭', '馒头', '面条', '红薯', '玉米', '燕麦', '全麦'];
                 var staple = pickOne('staple', staplePrefs[offset % staplePrefs.length]);
@@ -1240,7 +1340,7 @@
                 stapleServing = Math.max(80, Math.min(350, stapleServing));
                 result.push({ food: staple, serving: stapleServing, cat: 'staple' });
 
-                // --- 蛋白质：提供约85%的蛋白质需求 ---
+                // 蛋白质：提供约85%的蛋白质需求
                 var protNeed = Math.round(targetProtein * 0.85);
                 var protPrefs = ['鸡胸肉', '鸡蛋', '牛肉', '鱼', '虾', '豆腐'];
                 var protein = pickOne('meat', protPrefs[offset % protPrefs.length]);
@@ -1248,12 +1348,12 @@
                 protServing = Math.max(50, Math.min(300, protServing));
                 result.push({ food: protein, serving: protServing, cat: 'meat' });
 
-                // --- 蔬菜：固定180g ---
+                // 蔬菜：固定180g
                 var vegPrefs = ['西兰花', '菠菜', '西红柿', '黄瓜', '白菜', '生菜'];
                 var veg = pickOne('veg', vegPrefs[offset % vegPrefs.length]);
                 result.push({ food: veg, serving: 180, cat: 'veg' });
 
-                // --- 早餐额外加一份水果 ---
+                // 早餐额外加一份水果
                 if (mealName === '早餐') {
                     var fruitPrefs = ['苹果', '香蕉', '橙子', '蓝莓', '猕猴桃'];
                     var fruit = pickOne('fruit', fruitPrefs[offset % fruitPrefs.length]);
@@ -1262,58 +1362,6 @@
 
                 return result;
             }
-
-            // ===== 生成按钮点击 =====
-            generateBtn.addEventListener('click', function() {
-                if (this.disabled) return;
-                generatePlate(false);
-            });
-
-            // ===== 快捷按钮点击 =====
-            quickUseBtn.addEventListener('click', function() {
-                if (!window.userProfile) return;
-
-                // 根据BMI自动确定目标
-                var bmi = window.userProfile.bmi;
-                var goal;
-                if (bmi < 18.5) {
-                    goal = '增肌';
-                } else if (bmi >= 24) {
-                    goal = '减重';
-                } else {
-                    goal = '保持现状';
-                }
-
-                // 自动选择选项
-                selections.goal = goal;
-                selections.meal = '午餐';
-                selections.activity = '偶尔运动';
-
-                // 更新UI按钮状态
-                document.querySelectorAll('[data-question="goal"] .plate-option-btn').forEach(function(b) {
-                    b.classList.toggle('selected', b.getAttribute('data-value') === goal);
-                });
-                document.querySelectorAll('[data-question="meal"] .plate-option-btn').forEach(function(b) {
-                    b.classList.toggle('selected', b.getAttribute('data-value') === '午餐');
-                });
-                document.querySelectorAll('[data-question="activity"] .plate-option-btn').forEach(function(b) {
-                    b.classList.toggle('selected', b.getAttribute('data-value') === '偶尔运动');
-                });
-
-                // 更新提示文字
-                hints.goal.textContent = goal;
-                hints.goal.classList.add('has-value');
-                hints.meal.textContent = '午餐';
-                hints.meal.classList.add('has-value');
-                hints.activity.textContent = '偶尔运动';
-                hints.activity.classList.add('has-value');
-
-                // 更新摘要
-                updateSummary();
-
-                // 使用画像数据生成
-                generatePlate(true);
-            });
 
             // ===== 食物收藏功能 =====
             var FAV_KEY = 'nutrition_favorites';
@@ -1339,15 +1387,13 @@
                 }
                 saveFavorites(list);
                 updateFavCount();
-                // 如果当前是"只看收藏"模式，重新渲染
                 var btn = document.getElementById('favToggleBtn');
                 if (btn && btn.classList.contains('active')) {
                     renderFoodTable(document.getElementById('foodSearch').value);
                 } else {
-                    // 只刷新星标状态
                     updateFavStars();
                 }
-                return idx === -1; // true = 已收藏, false = 已取消
+                return idx === -1;
             }
 
             function isFavorite(name) {
@@ -1371,14 +1417,14 @@
             }
 
             // ===== 食物热量速查表 =====
-            /** 获取热量 CSS 类名 */
-            function calorieClass(kcal) {
-                if (kcal <= 50) return 'calorie-low';
-                if (kcal <= 150) return 'calorie-mid';
-                return 'calorie-high';
+            var currentFoodCat = 'all';
+
+            function kcalClass(kcal) {
+                if (kcal <= 50) return 'kcal-low';
+                if (kcal <= 150) return 'kcal-mid';
+                return 'kcal-high';
             }
 
-            /** 渲染食物表格 */
             function renderFoodTable(query) {
                 var tbody = document.getElementById('foodTableBody');
                 var empty = document.getElementById('foodEmpty');
@@ -1386,11 +1432,15 @@
                 if (!tbody) return;
 
                 var keyword = (query || '').trim().toLowerCase();
-                var filtered = keyword
-                    ? FOOD_DATA.filter(function(item) { return item.name.indexOf(keyword) !== -1; })
-                    : FOOD_DATA;
 
-                // 如果"只看收藏"模式开启，进一步筛选
+                var filtered = (currentFoodCat === 'all')
+                    ? FOOD_DATA.slice()
+                    : FOOD_DATA.filter(function(item) { return item.catCls === currentFoodCat; });
+
+                if (keyword) {
+                    filtered = filtered.filter(function(item) { return item.name.indexOf(keyword) !== -1; });
+                }
+
                 var favBtn = document.getElementById('favToggleBtn');
                 var favOnly = favBtn && favBtn.classList.contains('active');
                 if (favOnly) {
@@ -1414,9 +1464,9 @@
                     var fav = isFavorite(item.name);
                     html += '<tr>'
                         + '<td><button class="fav-star' + (fav ? ' active' : '') + '" data-name="' + item.name + '" title="' + (fav ? '取消收藏' : '收藏') + '">' + (fav ? '★' : '☆') + '</button></td>'
-                        + '<td><span class="food-category-tag ' + item.catCls + '">' + item.cat + '</span></td>'
+                        + '<td><span class="food-cat-tag ' + item.catCls + '">' + item.cat + '</span></td>'
                         + '<td class="food-name">' + item.name + '</td>'
-                        + '<td class="' + calorieClass(item.kcal) + '">' + item.kcal + '</td>'
+                        + '<td class="' + kcalClass(item.kcal) + '">' + item.kcal + '</td>'
                         + '<td>' + item.carbs + '</td>'
                         + '<td>' + item.protein + '</td>'
                         + '<td>' + item.fat + '</td>'
@@ -1425,7 +1475,22 @@
                 tbody.innerHTML = html;
             }
 
-            // 搜索框事件绑定
+            // 分类标签点击
+            var catBar = document.getElementById('foodCatBar');
+            if (catBar) {
+                catBar.addEventListener('click', function(e) {
+                    var btn = e.target.closest('.food-cat-btn');
+                    if (!btn) return;
+                    catBar.querySelectorAll('.food-cat-btn').forEach(function(b) {
+                        b.classList.remove('active');
+                    });
+                    btn.classList.add('active');
+                    currentFoodCat = btn.getAttribute('data-cat');
+                    renderFoodTable(document.getElementById('foodSearch').value);
+                });
+            }
+
+            // 搜索框
             var foodSearch = document.getElementById('foodSearch');
             if (foodSearch) {
                 foodSearch.addEventListener('input', function() {
@@ -1434,13 +1499,16 @@
             }
 
             // 收藏按钮事件委托
-            document.getElementById('tab-plate').addEventListener('click', function(e) {
-                var star = e.target.closest('.fav-star');
-                if (star) {
-                    var name = star.getAttribute('data-name');
-                    toggleFavorite(name);
-                }
-            });
+            var plateTab = document.getElementById('tab-plate');
+            if (plateTab) {
+                plateTab.addEventListener('click', function(e) {
+                    var star = e.target.closest('.fav-star');
+                    if (star) {
+                        var name = star.getAttribute('data-name');
+                        toggleFavorite(name);
+                    }
+                });
+            }
 
             // 只看收藏切换
             var favToggleBtn = document.getElementById('favToggleBtn');
@@ -1451,14 +1519,13 @@
                 });
             }
 
-            // 页面加载时更新收藏计数
+            // 初始化
             updateFavCount();
-
-            // 页面加载时渲染食物表格
             renderFoodTable('');
+            updateProfileCard();
         })();
 
-// ===== 标签页切换 =====
+        // ===== 标签页切换 =====
         var navBtns = document.querySelectorAll('.nav-btn');
         var tabs = document.querySelectorAll('.tab-content');
 
@@ -1476,7 +1543,6 @@
                 // 切换到餐盘生成器时检查用户画像
                 if (tabId === 'tab-plate') {
                     var pc = document.getElementById('profileCard');
-                    var qu = document.getElementById('quickUseBtn');
                     var ps = document.getElementById('profileStats');
                     if (window.userProfile && pc && ps) {
                         var p = window.userProfile;
@@ -1486,10 +1552,8 @@
                             + '<span class="profile-stat">碳水：<span class="stat-value">' + p.carbsRange[0] + '~' + p.carbsRange[1] + 'g</span></span>'
                             + '<span class="profile-stat">脂肪：<span class="stat-value">' + p.fatRange[0] + '~' + p.fatRange[1] + 'g</span></span>';
                         pc.style.display = 'block';
-                        if (qu) qu.style.display = 'block';
                     } else {
                         if (pc) pc.style.display = 'none';
-                        if (qu) qu.style.display = 'none';
                     }
                 }
             });
@@ -1500,6 +1564,5 @@
             renderHistory();
             renderTrendChart();
             updateMacroChart();
-            setTimeout(runCalculation, 300);
         });
     })();

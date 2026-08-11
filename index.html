@@ -6,35 +6,45 @@
     <title>营养计算器</title>
 <script src="./assets/chart.umd.min.js"></script>
     <style>
-        /* ===== 全局重置与基础样式 ===== */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        /* ============================================================
+               营养计算器 — 设计系统 v2
+               玻璃拟态 · 紫色主调 · 分类浏览
+               ============================================================ */
+
+        /* ---------- 全局重置 ---------- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
                          "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            background: linear-gradient(160deg, #f5f3ff 0%, #ede9fe 30%, #e0e7ff 60%, #f0f2ff 100%);
+            background-attachment: fixed;
             min-height: 100vh;
             padding: 0;
             color: #2d3436;
+            -webkit-font-smoothing: antialiased;
+            scroll-behavior: smooth;
         }
 
-        /* ===== 导航栏 ===== */
+        /* ---------- 自定义滚动条 ---------- */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #d0cdf0; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #b0abdf; }
+
+        /* ---------- 导航栏 ---------- */
         .nav-bar {
-            background: rgba(255, 255, 255, 0.92);
-            backdrop-filter: blur(8px);
-            border-bottom: 1px solid #e0e4e8;
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(108, 92, 231, 0.1);
             position: sticky;
             top: 0;
             z-index: 100;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
         }
 
         .nav-inner {
-            max-width: 720px;
+            max-width: 680px;
             margin: 0 auto;
             display: flex;
             align-items: stretch;
@@ -43,7 +53,7 @@
 
         .nav-btn {
             flex: 1;
-            padding: 14px 12px;
+            padding: 16px 12px;
             border: none;
             background: transparent;
             font-family: inherit;
@@ -52,7 +62,7 @@
             color: #636e72;
             cursor: pointer;
             position: relative;
-            transition: color 0.2s ease;
+            transition: color 0.25s ease;
             letter-spacing: 0.5px;
             text-align: center;
             -webkit-tap-highlight-color: transparent;
@@ -62,61 +72,47 @@
             content: '';
             position: absolute;
             bottom: 0;
-            left: 20%;
-            right: 20%;
+            left: 50%;
+            right: 50%;
             height: 3px;
             border-radius: 3px 3px 0 0;
-            background: #6c5ce7;
-            transform: scaleX(0);
-            transition: transform 0.25s ease, left 0.25s ease, right 0.25s ease;
+            background: linear-gradient(90deg, #6c5ce7, #a29bfe);
+            transition: left 0.3s ease, right 0.3s ease;
         }
 
-        .nav-btn.active {
-            color: #6c5ce7;
-        }
+        .nav-btn.active { color: #6c5ce7; }
+        .nav-btn.active::after { left: 16%; right: 16%; }
 
-        .nav-btn.active::after {
-            transform: scaleX(1);
-            left: 10%;
-            right: 10%;
-        }
+        .nav-btn:hover { color: #6c5ce7; }
 
-        .nav-btn:hover {
-            color: #6c5ce7;
-        }
-
-        /* ===== 标签页内容 ===== */
-        .tab-content {
-            display: none;
-            padding: 24px 16px;
-            max-width: 720px;
-            margin: 0 auto;
-        }
+        /* ---------- 标签页 ---------- */
+        .tab-content { display: none; }
 
         .tab-content.active {
             display: block;
-            animation: fadeInUp 0.4s ease-out;
+            animation: fadeUp 0.45s ease-out;
         }
 
-        /* ===== 主容器（旧样式保留作兼容） ===== */
-        .container {
-            max-width: 720px;
-            width: 100%;
+        .tab-content {
+            max-width: 680px;
             margin: 0 auto;
+            padding: 24px 16px 48px;
         }
 
-        /* ===== 标题 ===== */
+        /* ---------- 标题 ---------- */
         .app-title {
             text-align: center;
             margin-bottom: 28px;
-            animation: fadeInDown 0.6s ease-out;
         }
 
         .app-title h1 {
-            font-size: 28px;
+            font-size: 26px;
             font-weight: 700;
-            color: #2d3436;
-            letter-spacing: 1px;
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 0.5px;
         }
 
         .app-title p {
@@ -125,32 +121,32 @@
             margin-top: 6px;
         }
 
-        /* ===== 卡片通用 ===== */
+        /* ---------- 卡片 ---------- */
         .card {
-            background: rgba(255, 255, 255, 0.92);
-            backdrop-filter: blur(8px);
-            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 18px;
             padding: 24px 28px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 2px 20px rgba(108, 92, 231, 0.08), 0 1px 4px rgba(0,0,0,0.04);
             margin-bottom: 20px;
-            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            border: 1px solid rgba(255,255,255,0.6);
+            transition: box-shadow 0.3s ease, transform 0.2s ease;
         }
 
         .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+            box-shadow: 0 8px 32px rgba(108, 92, 231, 0.12), 0 2px 8px rgba(0,0,0,0.06);
+            transform: translateY(-1px);
         }
 
-        /* ===== 输入卡片 ===== */
-        .input-group {
+        /* ---------- 输入区域 ---------- */
+        .input-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 16px 20px;
         }
 
-        .input-group .full-width {
-            grid-column: 1 / -1;
-        }
+        .input-grid .span-full { grid-column: 1 / -1; }
 
         .field {
             display: flex;
@@ -162,28 +158,25 @@
             font-weight: 600;
             color: #636e72;
             margin-bottom: 6px;
-            letter-spacing: 0.3px;
         }
 
-        .field input,
-        .field select {
-            padding: 10px 14px;
+        .field input, .field select {
+            padding: 11px 14px;
             border: 2px solid #dfe6e9;
             border-radius: 10px;
             font-size: 15px;
             font-family: inherit;
             color: #2d3436;
             background: #fff;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            transition: border-color 0.25s ease, box-shadow 0.25s ease;
             outline: none;
             -webkit-appearance: none;
             appearance: none;
         }
 
-        .field input:focus,
-        .field select:focus {
+        .field input:focus, .field select:focus {
             border-color: #6c5ce7;
-            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.15);
+            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.12);
         }
 
         .field select {
@@ -193,67 +186,72 @@
             padding-right: 32px;
         }
 
-        /* ===== 按钮 ===== */
+        /* ---------- 主要按钮 ---------- */
         .btn-calculate {
             grid-column: 1 / -1;
             padding: 14px 0;
             border: none;
             border-radius: 12px;
-            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
             color: #fff;
             font-size: 17px;
             font-weight: 700;
             font-family: inherit;
             cursor: pointer;
             letter-spacing: 1px;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            transition: transform 0.2s ease, box-shadow 0.25s ease;
             margin-top: 4px;
+            position: relative;
+            overflow: hidden;
         }
+
+        .btn-calculate::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn-calculate:hover::after { left: 100%; }
 
         .btn-calculate:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(108, 92, 231, 0.35);
+            box-shadow: 0 8px 28px rgba(108, 92, 231, 0.35);
         }
 
-        .btn-calculate:active {
-            transform: translateY(0);
-        }
+        .btn-calculate:active { transform: translateY(0); }
 
-        /* ===== 结果卡片 ===== */
-        .result-card {
-            display: none;
-            animation: fadeInUp 0.5s ease-out;
-        }
+        /* ---------- 结果卡片 ---------- */
+        .result-card { display: none; }
+        .result-card.visible { display: block; animation: fadeUp 0.5s ease-out; }
 
-        .result-card.visible {
-            display: block;
-        }
-
-        /* ===== 结果指标网格 ===== */
+        /* ---------- 指标网格 ---------- */
         .metrics {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 14px;
+            gap: 12px;
             margin-bottom: 20px;
         }
 
         .metric-item {
-            background: #f8f9fa;
+            background: linear-gradient(135deg, #f8f9fa, #f0f1f3);
             border-radius: 12px;
-            padding: 16px;
+            padding: 16px 12px;
             text-align: center;
-            transition: background 0.2s ease;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
         .metric-item:hover {
-            background: #f0f1f3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
         }
 
         .metric-item .label {
             font-size: 12px;
             color: #636e72;
             font-weight: 500;
-            letter-spacing: 0.5px;
         }
 
         .metric-item .value {
@@ -268,15 +266,17 @@
             color: #636e72;
         }
 
-        /* 不同评价的颜色 */
-        .evaluation-underweight { color: #fdcb6e; }
-        .evaluation-normal     { color: #00b894; }
-        .evaluation-overweight { color: #e17055; }
-        .evaluation-obese      { color: #d63031; }
+        /* ---------- 评价颜色 ---------- */
+        .eval-underweight { color: #fdcb6e; }
+        .eval-normal     { color: #00b894; }
+        .eval-overweight { color: #e17055; }
+        .eval-obese      { color: #d63031; }
 
-        /* ===== 宏量营养素表格 ===== */
-        .macro-section h3 {
-            font-size: 16px;
+        /* ---------- 营养素表格 ---------- */
+        .macro-section { margin-top: 20px; }
+
+        .macro-section .section-title {
+            font-size: 15px;
             font-weight: 600;
             color: #2d3436;
             margin-bottom: 12px;
@@ -285,13 +285,13 @@
             gap: 8px;
         }
 
-        .macro-section h3::before {
+        .macro-section .section-title::before {
             content: "";
-            display: inline-block;
             width: 4px;
-            height: 18px;
+            height: 16px;
             background: #6c5ce7;
             border-radius: 2px;
+            flex-shrink: 0;
         }
 
         .macro-table {
@@ -306,7 +306,6 @@
             font-weight: 600;
             color: #636e72;
             font-size: 12px;
-            letter-spacing: 0.5px;
             border-bottom: 2px solid #dfe6e9;
         }
 
@@ -315,40 +314,27 @@
             border-bottom: 1px solid #f0f1f3;
         }
 
-        .macro-table tr:last-child td {
-            border-bottom: none;
-        }
+        .macro-table tr:last-child td { border-bottom: none; }
 
-        .macro-table .nutrient-name {
-            font-weight: 600;
-            color: #2d3436;
-        }
+        .macro-table .name-cell { font-weight: 600; color: #2d3436; }
+        .macro-table .range-cell { color: #6c5ce7; font-weight: 600; }
+        .macro-table .ratio-cell { color: #636e72; }
 
-        .macro-table .nutrient-range {
-            color: #6c5ce7;
-            font-weight: 600;
-        }
-
-        .macro-table .nutrient-ratio {
-            color: #636e72;
-        }
-
-        /* 供能比色块 */
-        .ratio-bar {
+        .ratio-dot {
             display: inline-block;
-            height: 8px;
-            border-radius: 4px;
+            width: 8px; height: 8px;
+            border-radius: 50%;
             margin-right: 6px;
             vertical-align: middle;
         }
 
-        .ratio-bar.carbs  { background: #fdcb6e; }
-        .ratio-bar.protein { background: #6c5ce7; }
-        .ratio-bar.fat    { background: #e17055; }
+        .ratio-dot.carbs  { background: #fdcb6e; }
+        .ratio-dot.protein { background: #6c5ce7; }
+        .ratio-dot.fat    { background: #e17055; }
 
-        /* ===== 建议区域 ===== */
+        /* ---------- 建议框 ---------- */
         .advice-box {
-            background: linear-gradient(135deg, #dfe6e9, #f0f1f3);
+            background: linear-gradient(135deg, #f8f9fa, #f0f1f3);
             border-radius: 12px;
             padding: 16px 20px;
             margin-top: 16px;
@@ -358,15 +344,15 @@
             border-left: 4px solid #6c5ce7;
         }
 
-        /* ===== 供能比饼图 ===== */
+        /* ---------- 图表区域 ---------- */
         .chart-section {
             margin-top: 20px;
             padding-top: 16px;
             border-top: 1px solid #f0f1f3;
         }
 
-        .chart-section h3 {
-            font-size: 16px;
+        .chart-section .section-title {
+            font-size: 15px;
             font-weight: 600;
             color: #2d3436;
             margin-bottom: 12px;
@@ -375,32 +361,29 @@
             gap: 8px;
         }
 
-        .chart-section h3::before {
+        .chart-section .section-title::before {
             content: "";
-            display: inline-block;
-            width: 4px;
-            height: 18px;
+            width: 4px; height: 16px;
             background: #6c5ce7;
             border-radius: 2px;
+            flex-shrink: 0;
         }
 
-        .chart-wrapper {
+        .chart-wrap {
             position: relative;
-            max-width: 320px;
+            max-width: 280px;
             margin: 0 auto;
         }
 
-        /* ===== 折叠公式说明 ===== */
+        /* ---------- 公式折叠 ---------- */
         .formula-details {
             cursor: pointer;
         }
 
-        .formula-details[open] {
-            cursor: default;
-        }
+        .formula-details[open] { cursor: default; }
 
         .formula-summary {
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 600;
             color: #6c5ce7;
             padding: 4px 0;
@@ -408,36 +391,25 @@
             user-select: none;
         }
 
-        .formula-summary::-webkit-details-marker {
-            color: #6c5ce7;
-        }
+        .formula-summary::-webkit-details-marker { color: #6c5ce7; }
 
-        .formula-content {
+        .formula-body {
             margin-top: 16px;
             font-size: 14px;
             line-height: 1.8;
             color: #2d3436;
         }
 
-        .formula-content h4 {
+        .formula-body h4 {
             font-size: 14px;
             font-weight: 600;
             margin: 16px 0 8px;
-            color: #2d3436;
         }
 
-        .formula-content h4:first-of-type {
-            margin-top: 0;
-        }
+        .formula-body h4:first-of-type { margin-top: 0; }
 
-        .formula-content ul {
-            padding-left: 20px;
-            margin: 8px 0;
-        }
-
-        .formula-content li {
-            margin-bottom: 6px;
-        }
+        .formula-body ul { padding-left: 20px; margin: 8px 0; }
+        .formula-body li { margin-bottom: 6px; }
 
         .formula-block {
             background: #f8f9fa;
@@ -453,9 +425,7 @@
             padding: 6px 0;
         }
 
-        .formula-row + .formula-row {
-            border-top: 1px solid #eee;
-        }
+        .formula-row + .formula-row { border-top: 1px solid #eee; }
 
         .formula-label {
             font-weight: 600;
@@ -468,17 +438,12 @@
             font-family: "Courier New", Consolas, monospace;
             font-size: 15px;
             color: #2d3436;
-            letter-spacing: 0.5px;
         }
 
-        /* ===== 历史记录 ===== */
-        .trend-section {
-            margin-bottom: 20px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid #f0f1f3;
-        }
+        /* ---------- BMI 趋势 ---------- */
+        .trend-section { margin-bottom: 20px; }
 
-        .trend-section h3 {
+        .trend-section .section-title {
             font-size: 15px;
             font-weight: 600;
             color: #2d3436;
@@ -488,19 +453,18 @@
             gap: 8px;
         }
 
-        .trend-section h3::before {
+        .trend-section .section-title::before {
             content: "";
-            display: inline-block;
-            width: 4px;
-            height: 16px;
+            width: 4px; height: 16px;
             background: #00b894;
             border-radius: 2px;
+            flex-shrink: 0;
         }
 
         .trend-chart-wrap {
             position: relative;
-            max-width: 100%;
-            height: 180px;
+            width: 100%;
+            height: 200px;
         }
 
         .trend-empty {
@@ -508,19 +472,18 @@
             padding: 40px 0;
             color: #b2bec3;
             font-size: 13px;
-            display: block;
         }
 
-        .history-header {
-        .history-header {
+        /* ---------- 历史记录 ---------- */
+        .history-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 14px;
         }
 
-        .history-header h3 {
-            font-size: 16px;
+        .history-bar .section-title {
+            font-size: 15px;
             font-weight: 600;
             color: #2d3436;
             display: flex;
@@ -528,16 +491,15 @@
             gap: 8px;
         }
 
-        .history-header h3::before {
+        .history-bar .section-title::before {
             content: "";
-            display: inline-block;
-            width: 4px;
-            height: 18px;
+            width: 4px; height: 16px;
             background: #6c5ce7;
             border-radius: 2px;
+            flex-shrink: 0;
         }
 
-        .history-count {
+        .badge {
             font-size: 12px;
             font-weight: 400;
             color: #636e72;
@@ -556,7 +518,7 @@
             font-size: 12px;
             font-family: inherit;
             cursor: pointer;
-            transition: background 0.2s ease, color 0.2s ease;
+            transition: background 0.25s ease, color 0.25s ease;
         }
 
         .btn-clear-all:hover {
@@ -577,14 +539,8 @@
             overflow-y: auto;
         }
 
-        .history-list::-webkit-scrollbar {
-            width: 4px;
-        }
-
-        .history-list::-webkit-scrollbar-thumb {
-            background: #dfe6e9;
-            border-radius: 2px;
-        }
+        .history-list::-webkit-scrollbar { width: 4px; }
+        .history-list::-webkit-scrollbar-thumb { background: #dfe6e9; border-radius: 2px; }
 
         .history-item {
             display: flex;
@@ -598,18 +554,10 @@
             cursor: pointer;
         }
 
-        .history-item:hover {
-            background: #f0f1f3;
-        }
+        .history-item:hover { background: #f0f1f3; }
+        .history-item:last-child { margin-bottom: 0; }
 
-        .history-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .history-item-main {
-            flex: 1;
-            min-width: 0;
-        }
+        .history-item-main { flex: 1; min-width: 0; }
 
         .history-item-top {
             display: flex;
@@ -632,29 +580,14 @@
         .history-item-eval {
             font-size: 12px;
             font-weight: 600;
-            padding: 1px 8px;
+            padding: 2px 8px;
             border-radius: 6px;
         }
 
-        .history-item-eval.underweight {
-            background: #fef3d5;
-            color: #d68910;
-        }
-
-        .history-item-eval.normal {
-            background: #d5f5e3;
-            color: #1a8a5c;
-        }
-
-        .history-item-eval.overweight {
-            background: #fde8e0;
-            color: #c0392b;
-        }
-
-        .history-item-eval.obese {
-            background: #fadbd8;
-            color: #b03a2e;
-        }
+        .history-item-eval.underweight { background: #fef3d5; color: #d68910; }
+        .history-item-eval.normal      { background: #d5f5e3; color: #1a8a5c; }
+        .history-item-eval.overweight  { background: #fde8e0; color: #c0392b; }
+        .history-item-eval.obese       { background: #fadbd8; color: #b03a2e; }
 
         .history-item-detail {
             font-size: 12px;
@@ -663,8 +596,7 @@
         }
 
         .btn-delete-item {
-            width: 30px;
-            height: 30px;
+            width: 30px; height: 30px;
             border: none;
             border-radius: 8px;
             background: transparent;
@@ -678,26 +610,22 @@
             justify-content: center;
         }
 
-        .btn-delete-item:hover {
-            background: #fadbd8;
-            color: #d63031;
-        }
+        .btn-delete-item:hover { background: #fadbd8; color: #d63031; }
 
-        /* ===== 收藏功能 ===== */
+        /* ---------- 收藏按钮 ---------- */
         .fav-toggle {
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            padding: 4px 12px;
+            padding: 5px 14px;
             border: 1.5px solid #dfe6e9;
             border-radius: 8px;
             background: transparent;
             font-family: inherit;
-            font-size: 12px;
+            font-size: 13px;
             color: #636e72;
             cursor: pointer;
-            transition: all 0.2s ease;
-            margin-left: 8px;
+            transition: all 0.25s ease;
         }
 
         .fav-toggle:hover {
@@ -715,58 +643,63 @@
             cursor: pointer;
             border: none;
             background: none;
-            font-size: 16px;
+            font-size: 18px;
             line-height: 1;
             padding: 2px 4px;
             transition: transform 0.2s ease;
             color: #dfe6e9;
         }
 
-        .fav-star:hover {
-            transform: scale(1.2);
-        }
+        .fav-star:hover { transform: scale(1.25); }
+        .fav-star.active { color: #fdcb6e; }
 
-        .fav-star.active {
-            color: #fdcb6e;
-        }
+        /* ---------- 食物数据库 — 分类浏览 ---------- */
+        .food-section { margin-top: 0; }
 
-        .food-table th:first-child,
-        .food-table td:first-child {
-            padding-left: 4px;
-            padding-right: 4px;
-            width: 32px;
-            text-align: center;
-        }
-
-        /* ===== 食物热量速查表 ===== */
-        .food-details {
-            cursor: pointer;
-            margin-top: 0;
-        }
-
-        .food-details[open] {
-            cursor: default;
-        }
-
-        .food-summary {
-            font-size: 16px;
-            font-weight: 600;
-            color: #2d3436;
-            padding: 4px 0;
-            cursor: pointer;
-            user-select: none;
+        .food-cat-bar {
             display: flex;
-            align-items: center;
             gap: 8px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
         }
 
-        .food-summary::-webkit-details-marker {
+        .food-cat-btn {
+            padding: 7px 18px;
+            border: 1.5px solid #dfe6e9;
+            border-radius: 20px;
+            background: #fff;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 500;
+            color: #636e72;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .food-cat-btn:hover {
+            border-color: #6c5ce7;
             color: #6c5ce7;
         }
 
+        .food-cat-btn.active {
+            background: #6c5ce7;
+            border-color: #6c5ce7;
+            color: #fff;
+        }
+
+        .food-toolbar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+        }
+
         .food-search {
-            width: 100%;
-            padding: 10px 14px;
+            flex: 1;
+            min-width: 160px;
+            padding: 9px 14px;
             border: 2px solid #dfe6e9;
             border-radius: 10px;
             font-size: 14px;
@@ -774,81 +707,73 @@
             color: #2d3436;
             background: #fff;
             outline: none;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-            margin-bottom: 14px;
+            transition: border-color 0.25s ease, box-shadow 0.25s ease;
         }
 
         .food-search:focus {
             border-color: #6c5ce7;
-            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.15);
+            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.12);
         }
+
+        .food-search::placeholder { color: #b2bec3; }
 
         .food-table-wrap {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
             border-radius: 10px;
+            border: 1px solid #f0f1f3;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
         }
 
         .food-table {
             width: 100%;
             border-collapse: collapse;
             font-size: 13px;
-            min-width: 480px;
+            min-width: 460px;
         }
 
         .food-table th {
             text-align: left;
-            padding: 10px 8px;
+            padding: 10px 10px;
             font-weight: 600;
             color: #fff;
             font-size: 12px;
-            letter-spacing: 0.5px;
-            background: #6c5ce7;
-            position: sticky;
-            top: 0;
-            z-index: 1;
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            white-space: nowrap;
         }
 
-        .food-table th:first-child {
-            border-radius: 0;
-        }
+        .food-table th:first-child { border-radius: 10px 0 0 0; }
+        .food-table th:last-child { border-radius: 0 10px 0 0; }
 
         .food-table td {
-            padding: 8px 8px;
+            padding: 8px 10px;
             border-bottom: 1px solid #f0f1f3;
             white-space: nowrap;
         }
 
-        .food-table tr:nth-child(even) td {
-            background: #fafafa;
-        }
+        .food-table tbody tr { transition: background 0.15s ease; }
+        .food-table tbody tr:nth-child(even) td { background: #fafafa; }
+        .food-table tbody tr:hover td { background: #f0edff; }
 
-        .food-table tr:hover td {
-            background: #f0edff;
-        }
+        .food-name { font-weight: 600; color: #2d3436; }
 
-        .food-name {
-            font-weight: 600;
-            color: #2d3436;
-        }
-
-        .food-category-tag {
+        .food-cat-tag {
             display: inline-block;
             font-size: 11px;
-            padding: 1px 8px;
+            padding: 2px 8px;
             border-radius: 6px;
             font-weight: 500;
         }
 
-        .food-category-tag.staple { background: #fef3d5; color: #d68910; }
-        .food-category-tag.meat   { background: #fde8e0; color: #c0392b; }
-        .food-category-tag.veg    { background: #d5f5e3; color: #1a8a5c; }
-        .food-category-tag.fruit  { background: #fce4ec; color: #e91e63; }
-        .food-category-tag.snack  { background: #e8eaf6; color: #3949ab; }
+        .food-cat-tag.staple { background: #fef3d5; color: #d68910; }
+        .food-cat-tag.meat   { background: #fde8e0; color: #c0392b; }
+        .food-cat-tag.veg    { background: #d5f5e3; color: #1a8a5c; }
+        .food-cat-tag.fruit  { background: #fce4ec; color: #e91e63; }
+        .food-cat-tag.snack  { background: #e8eaf6; color: #3949ab; }
 
-        .calorie-low  { color: #00b894; font-weight: 600; }
-        .calorie-mid  { color: #d68910; font-weight: 600; }
-        .calorie-high { color: #d63031; font-weight: 600; }
+        .kcal-low  { color: #00b894; font-weight: 600; }
+        .kcal-mid  { color: #d68910; font-weight: 600; }
+        .kcal-high { color: #d63031; font-weight: 600; }
 
         .food-empty {
             text-align: center;
@@ -859,33 +784,32 @@
 
         .food-count {
             font-size: 12px;
-            font-weight: 400;
             color: #636e72;
-            background: #f0f1f3;
-            padding: 2px 10px;
-            border-radius: 10px;
-            margin-left: 6px;
         }
 
-        /* ===== 餐盘生成器 ===== */
+        /* ---------- 餐盘生成器 ---------- */
         .plate-card {
-            background: rgba(255, 255, 255, 0.92);
-            backdrop-filter: blur(8px);
-            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 18px;
             padding: 24px 28px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 2px 20px rgba(108, 92, 231, 0.08), 0 1px 4px rgba(0,0,0,0.04);
             margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.6);
+            transition: box-shadow 0.3s ease, transform 0.2s ease;
         }
 
-        .plate-question {
-            margin-bottom: 22px;
+        .plate-card:hover {
+            box-shadow: 0 8px 32px rgba(108, 92, 231, 0.12), 0 2px 8px rgba(0,0,0,0.06);
+            transform: translateY(-1px);
         }
-        .plate-question:last-of-type {
-            margin-bottom: 0;
-        }
+
+        .plate-question { margin-bottom: 20px; }
+        .plate-question:last-of-type { margin-bottom: 0; }
 
         .plate-question-label {
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 600;
             color: #2d3436;
             margin-bottom: 10px;
@@ -896,11 +820,10 @@
 
         .plate-question-label::before {
             content: "";
-            display: inline-block;
-            width: 4px;
-            height: 16px;
+            width: 4px; height: 16px;
             background: #E88A5A;
             border-radius: 2px;
+            flex-shrink: 0;
         }
 
         .plate-options {
@@ -921,7 +844,7 @@
             font-weight: 500;
             color: #636e72;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.25s ease;
             text-align: center;
             -webkit-tap-highlight-color: transparent;
             user-select: none;
@@ -945,10 +868,7 @@
             min-height: 20px;
         }
 
-        .plate-selected-hint.has-value {
-            color: #E88A5A;
-            font-weight: 500;
-        }
+        .plate-selected-hint.has-value { color: #E88A5A; font-weight: 500; }
 
         .plate-summary-bar {
             background: #f8f9fa;
@@ -962,34 +882,42 @@
             border: 1px solid #f0f1f3;
         }
 
-        .plate-summary-bar .highlight {
-            color: #E88A5A;
-            font-weight: 600;
-        }
+        .plate-summary-bar .highlight { color: #6c5ce7; font-weight: 700; }
 
         .btn-generate {
             width: 100%;
             padding: 16px 0;
             border: none;
             border-radius: 12px;
-            background: linear-gradient(135deg, #E88A5A, #f0a07a);
+            background: linear-gradient(135deg, #E88A5A 0%, #f0a07a 100%);
             color: #fff;
             font-size: 18px;
             font-weight: 700;
             font-family: inherit;
             cursor: pointer;
             letter-spacing: 1px;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            transition: transform 0.2s ease, box-shadow 0.25s ease;
+            position: relative;
+            overflow: hidden;
         }
+
+        .btn-generate::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn-generate:hover::after { left: 100%; }
 
         .btn-generate:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(232, 138, 90, 0.35);
+            box-shadow: 0 8px 28px rgba(232, 138, 90, 0.35);
         }
 
-        .btn-generate:active {
-            transform: translateY(0);
-        }
+        .btn-generate:active { transform: translateY(0); }
 
         .btn-generate:disabled {
             opacity: 0.5;
@@ -998,26 +926,15 @@
             box-shadow: none !important;
         }
 
-        /* ===== 餐盘结果区 ===== */
-        .plate-result {
-            display: none;
-            animation: fadeInUp 0.5s ease-out;
-        }
+        /* ---------- 餐盘结果 ---------- */
+        .plate-result { display: none; }
+        .plate-result.visible { display: block; animation: fadeUp 0.5s ease-out; }
 
-        .plate-result.visible {
-            display: block;
-        }
-
-        .plate-result-section {
-            margin-bottom: 20px;
-        }
-
-        .plate-result-section:last-child {
-            margin-bottom: 0;
-        }
+        .plate-result-section { margin-bottom: 20px; }
+        .plate-result-section:last-child { margin-bottom: 0; }
 
         .plate-result-section h3 {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
             color: #2d3436;
             margin-bottom: 14px;
@@ -1028,17 +945,19 @@
 
         .plate-result-section h3::before {
             content: "";
-            display: inline-block;
-            width: 4px;
-            height: 18px;
+            width: 4px; height: 16px;
             background: #E88A5A;
             border-radius: 2px;
+            flex-shrink: 0;
         }
 
         .plate-chart-wrap {
             position: relative;
-            max-width: 280px;
+            max-width: 260px;
             margin: 0 auto 16px;
+            padding: 8px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 50%;
         }
 
         .plate-macro-detail {
@@ -1046,7 +965,6 @@
             justify-content: center;
             gap: 20px;
             flex-wrap: wrap;
-            margin-bottom: 4px;
         }
 
         .plate-macro-item {
@@ -1059,107 +977,17 @@
 
         .plate-macro-item .macro-color-dot {
             display: inline-block;
-            width: 10px;
-            height: 10px;
+            width: 10px; height: 10px;
             border-radius: 50%;
             margin-right: 6px;
             vertical-align: middle;
         }
 
-        .plate-macro-item .macro-name {
-            font-size: 13px;
-            color: #636e72;
-        }
+        .plate-macro-item .macro-name { font-size: 13px; color: #636e72; }
+        .plate-macro-item .macro-gram { font-size: 18px; font-weight: 700; color: #2d3436; margin-top: 2px; }
+        .plate-macro-item .macro-pct  { font-size: 12px; color: #b2bec3; }
 
-        .plate-macro-item .macro-gram {
-            font-size: 18px;
-            font-weight: 700;
-            color: #2d3436;
-            margin-top: 2px;
-        }
-
-        .plate-macro-item .macro-pct {
-            font-size: 12px;
-            color: #b2bec3;
-        }
-
-        /* ===== 食物搭配清单 ===== */
-        .plate-food-grid {
-            display: grid;
-            gap: 10px;
-        }
-
-        .plate-food-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 16px;
-            border-radius: 10px;
-            font-size: 14px;
-        }
-
-        .plate-food-item.good {
-            background: #f0f9f0;
-        }
-
-        .plate-food-item.bad {
-            background: #fdf0f0;
-        }
-
-        .plate-food-tag {
-            flex-shrink: 0;
-            font-size: 11px;
-            font-weight: 600;
-            padding: 2px 10px;
-            border-radius: 6px;
-            letter-spacing: 0.5px;
-        }
-
-        .plate-food-tag.good-tag {
-            background: #7BAF7A;
-            color: #fff;
-        }
-
-        .plate-food-tag.bad-tag {
-            background: #e17055;
-            color: #fff;
-        }
-
-        .plate-food-text {
-            color: #2d3436;
-            line-height: 1.4;
-        }
-
-        .plate-food-text .food-label {
-            font-weight: 600;
-        }
-
-        .plate-food-name {
-            font-weight: 600;
-            color: #2d3436;
-        }
-
-        .food-serving {
-            font-size: 13px;
-            color: #636e72;
-        }
-
-        .food-nutrition {
-            font-size: 12px;
-            color: #b2bec3;
-            white-space: nowrap;
-        }
-
-        @media (max-width: 540px) {
-            .food-nutrition {
-                display: block;
-                white-space: normal;
-                margin-top: 2px;
-                padding-left: 0;
-            }
-        }
-
-        /* ===== 三餐网格 ===== */
+        /* ---------- 三餐网格 ---------- */
         .meal-grid {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
@@ -1168,23 +996,25 @@
         }
 
         .meal-card {
-            background: rgba(255, 255, 255, 0.92);
-            backdrop-filter: blur(8px);
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             border-radius: 16px;
             padding: 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-            border: 2px solid transparent;
-            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+            border: 1px solid rgba(255,255,255,0.6);
+            transition: box-shadow 0.3s ease, transform 0.2s ease, border-color 0.3s ease;
         }
 
         .meal-card:hover {
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1);
             transform: translateY(-2px);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
         }
 
         .meal-card.highlight {
             border-color: #6c5ce7;
-            background: rgba(108, 92, 231, 0.04);
+            background: rgba(108, 92, 231, 0.06);
+            box-shadow: 0 4px 20px rgba(108, 92, 231, 0.15);
         }
 
         .meal-header {
@@ -1198,7 +1028,7 @@
         }
 
         .meal-title {
-            font-size: 17px;
+            font-size: 16px;
             font-weight: 700;
             color: #2d3436;
             flex-shrink: 0;
@@ -1211,10 +1041,7 @@
             line-height: 1.5;
         }
 
-        .meal-body {
-            display: grid;
-            gap: 8px;
-        }
+        .meal-body { display: grid; gap: 8px; }
 
         .meal-food-item {
             display: flex;
@@ -1226,44 +1053,28 @@
             font-size: 13px;
         }
 
-        .meal-food-item .food-dot {
-            width: 8px;
-            height: 8px;
+        .meal-food-item .dot {
+            width: 8px; height: 8px;
             border-radius: 50%;
             flex-shrink: 0;
         }
 
-        .meal-food-item .food-dot.staple { background: #E88A5A; }
-        .meal-food-item .food-dot.meat   { background: #e17055; }
-        .meal-food-item .food-dot.veg    { background: #7BAF7A; }
-        .meal-food-item .food-dot.fruit  { background: #B39DDB; }
+        .meal-food-item .dot.staple { background: #E88A5A; }
+        .meal-food-item .dot.meat   { background: #e17055; }
+        .meal-food-item .dot.veg    { background: #7BAF7A; }
+        .meal-food-item .dot.fruit  { background: #B39DDB; }
 
-        .meal-food-item .food-info {
+        .meal-food-item .info {
             flex: 1;
             line-height: 1.4;
             min-width: 0;
         }
 
-        .meal-food-item .food-name {
-            font-weight: 600;
-            color: #2d3436;
-        }
+        .meal-food-item .food-name { font-weight: 600; color: #2d3436; }
+        .meal-food-item .food-nutrition { font-size: 11px; color: #b2bec3; }
 
-        .meal-food-item .food-nutrition {
-            font-size: 11px;
-            color: #b2bec3;
-        }
-
-        @media (max-width: 640px) {
-            .meal-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* ===== 替换建议 ===== */
-        .plate-swap-list {
-            list-style: none;
-        }
+        /* ---------- 替换建议 ---------- */
+        .plate-swap-list { list-style: none; }
 
         .plate-swap-item {
             display: flex;
@@ -1277,14 +1088,11 @@
             color: #2d3436;
         }
 
-        .plate-swap-item:last-child {
-            margin-bottom: 0;
-        }
+        .plate-swap-item:last-child { margin-bottom: 0; }
 
         .plate-swap-item .swap-icon {
             flex-shrink: 0;
-            width: 26px;
-            height: 26px;
+            width: 26px; height: 26px;
             border-radius: 50%;
             background: #7BAF7A;
             color: #fff;
@@ -1306,10 +1114,8 @@
             line-height: 1.6;
         }
 
-        /* ===== 用户画像提示卡 ===== */
-        .profile-card {
-            border-left: 4px solid #6c5ce7;
-        }
+        /* ---------- 用户画像卡片 ---------- */
+        .profile-card { border-left: 4px solid #6c5ce7; }
 
         .profile-card-content {
             display: flex;
@@ -1323,9 +1129,7 @@
             line-height: 1;
         }
 
-        .profile-info {
-            flex: 1;
-        }
+        .profile-info { flex: 1; }
 
         .profile-title {
             font-size: 15px;
@@ -1340,106 +1144,11 @@
             gap: 8px 16px;
         }
 
-        .profile-stat {
-            font-size: 13px;
-            color: #636e72;
-        }
+        .profile-stat { font-size: 13px; color: #636e72; }
+        .profile-stat .stat-label { color: #b2bec3; }
+        .profile-stat .stat-value { font-weight: 600; color: #6c5ce7; }
 
-        .profile-stat .stat-label {
-            color: #b2bec3;
-        }
-
-        .profile-stat .stat-value {
-            font-weight: 600;
-            color: #6c5ce7;
-        }
-
-        /* ===== 快捷使用按钮 ===== */
-        .btn-quick-use {
-            width: 100%;
-            padding: 12px 0;
-            border: 2px solid #6c5ce7;
-            border-radius: 12px;
-            background: rgba(108, 92, 231, 0.08);
-            color: #6c5ce7;
-            font-size: 15px;
-            font-weight: 600;
-            font-family: inherit;
-            cursor: pointer;
-            letter-spacing: 0.5px;
-            transition: all 0.2s ease;
-            margin-bottom: 16px;
-        }
-
-        .btn-quick-use:hover {
-            background: #6c5ce7;
-            color: #fff;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 16px rgba(108, 92, 231, 0.25);
-        }
-
-        /* ===== 餐盘生成器移动端适配 ===== */
-        @media (max-width: 540px) {
-            .plate-card {
-                padding: 18px 16px;
-                border-radius: 12px;
-            }
-
-            .plate-option-btn {
-                min-width: 60px;
-                padding: 10px 12px;
-                font-size: 13px;
-            }
-
-            .plate-macro-detail {
-                gap: 10px;
-            }
-
-            .plate-macro-item {
-                padding: 6px 12px;
-                min-width: 70px;
-            }
-
-            .plate-chart-wrap {
-                max-width: 220px;
-            }
-
-            .btn-generate {
-                font-size: 16px;
-                padding: 14px 0;
-            }
-        }
-
-        @media (max-width: 540px) {
-            .food-table {
-                font-size: 12px;
-                min-width: 420px;
-            }
-
-            .food-table th,
-            .food-table td {
-                padding: 7px 5px;
-            }
-
-            .food-search {
-                font-size: 13px;
-                padding: 9px 12px;
-            }
-        }
-
-        @media (max-width: 380px) {
-            .food-table {
-                font-size: 11px;
-                min-width: 360px;
-            }
-
-            .food-table th,
-            .food-table td {
-                padding: 6px 4px;
-            }
-        }
-
-        /* ===== 导出按钮 ===== */
+        /* ---------- 导出按钮 ---------- */
         .btn-export {
             width: 100%;
             padding: 12px 0;
@@ -1452,7 +1161,7 @@
             font-family: inherit;
             cursor: pointer;
             letter-spacing: 0.5px;
-            transition: all 0.2s ease;
+            transition: all 0.25s ease;
             margin-top: 16px;
         }
 
@@ -1463,9 +1172,7 @@
             box-shadow: 0 4px 16px rgba(0, 184, 148, 0.25);
         }
 
-        .btn-export:active {
-            transform: translateY(0);
-        }
+        .btn-export:active { transform: translateY(0); }
 
         .btn-export.copied {
             background: #00b894;
@@ -1473,97 +1180,316 @@
             border-color: #00b894;
         }
 
-        /* ===== 动画关键帧 ===== */
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        /* ---------- 自定义营养素目标 ---------- */
+        .target-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
         }
 
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(24px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .target-badge {
+            font-size: 12px;
+            font-weight: 500;
+            padding: 3px 12px;
+            border-radius: 10px;
+            background: #f0f1f3;
+            color: #636e72;
+            transition: all 0.3s ease;
         }
 
-        /* ===== 移动端适配 ===== */
-        @media (max-width: 540px) {
-            body {
-                padding: 0;
-            }
+        .target-badge.active {
+            background: #d5f5e3;
+            color: #1a8a5c;
+        }
 
-            .tab-content {
-                padding: 16px 12px;
-            }
+        .target-desc {
+            font-size: 13px;
+            color: #b2bec3;
+            margin-bottom: 16px;
+        }
 
-            .card {
-                padding: 18px 16px;
-                border-radius: 12px;
-            }
+        .target-mode-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 18px;
+        }
 
-            .app-title h1 {
-                font-size: 22px;
-            }
+        .target-mode-btn {
+            flex: 1;
+            padding: 8px 0;
+            border: 2px solid #dfe6e9;
+            border-radius: 10px;
+            background: #f8f9fa;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 600;
+            color: #636e72;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            text-align: center;
+        }
 
-            .input-group {
-                grid-template-columns: 1fr;
-                gap: 12px;
-            }
+        .target-mode-btn:hover {
+            border-color: #6c5ce7;
+            color: #6c5ce7;
+        }
 
-            .input-group .full-width {
-                grid-column: 1;
-            }
+        .target-mode-btn.active {
+            background: #6c5ce7;
+            border-color: #6c5ce7;
+            color: #fff;
+        }
 
-            .metrics {
-                grid-template-columns: 1fr 1fr;
-                gap: 10px;
-            }
+        .target-inputs {
+            display: grid;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
 
-            .metric-item {
-                padding: 12px 8px;
-            }
+        .target-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
 
-            .metric-item .value {
-                font-size: 22px;
-            }
+        .target-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #2d3436;
+            min-width: 100px;
+        }
 
-            .macro-table {
-                font-size: 13px;
-            }
+        .target-dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
 
-            .macro-table th,
-            .macro-table td {
-                padding: 8px 4px;
-            }
+        .target-dot.carbs  { background: #fdcb6e; }
+        .target-dot.protein { background: #6c5ce7; }
+        .target-dot.fat     { background: #e17055; }
 
-            .history-item-top {
-                gap: 6px;
-            }
+        .target-input {
+            flex: 1;
+            max-width: 120px;
+            padding: 9px 12px;
+            border: 2px solid #dfe6e9;
+            border-radius: 10px;
+            font-size: 15px;
+            font-family: inherit;
+            color: #2d3436;
+            background: #fff;
+            outline: none;
+            transition: border-color 0.25s ease, box-shadow 0.25s ease;
+            text-align: right;
+        }
 
-            .history-item-bmi {
-                font-size: 14px;
-            }
+        .target-input:focus {
+            border-color: #6c5ce7;
+            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.12);
+        }
 
-            .nav-btn {
-                font-size: 14px;
-                padding: 12px 10px;
-            }
+        .target-input::placeholder { color: #b2bec3; }
+
+        .target-unit {
+            font-size: 14px;
+            font-weight: 600;
+            color: #636e72;
+            min-width: 28px;
+        }
+
+        /* ---------- 步骤指示器 ---------- */
+        .step-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+            margin-bottom: 24px;
+            padding: 0 16px;
+        }
+
+        .step-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 20px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.6);
+            transition: all 0.3s ease;
+        }
+
+        .step-item.active {
+            background: rgba(108,92,231,0.12);
+            transform: scale(1.02);
+        }
+
+        .step-item.active .step-num {
+            background: #6c5ce7;
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(108,92,231,0.3);
+        }
+
+        .step-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #b2bec3;
+            transition: color 0.3s ease;
+        }
+
+        .step-item.active .step-label {
+            color: #6c5ce7;
+        }
+
+        .step-connector {
+            width: 40px;
+            height: 2px;
+            background: #dfe6e9;
+            margin: 0 4px;
+        }
+
+        /* ---------- 步骤面板 ---------- */
+        .step-panel { animation: fadeUp 0.4s ease-out; }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding-bottom: 14px;
+            border-bottom: 2px solid #f0f1f3;
+        }
+
+        .panel-icon { font-size: 22px; line-height: 1; }
+
+        .panel-title {
+            font-size: 17px;
+            font-weight: 700;
+            color: #2d3436;
+        }
+
+        /* ---------- 数据来源切换 ---------- */
+        .source-toggle {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .source-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            padding: 20px 12px;
+            border: 2px solid #dfe6e9;
+            border-radius: 14px;
+            background: #f8f9fa;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .source-btn:hover {
+            border-color: #6c5ce7;
+            background: rgba(108,92,231,0.04);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(108,92,231,0.1);
+        }
+
+        .source-btn.active {
+            border-color: #6c5ce7;
+            background: rgba(108,92,231,0.08);
+            box-shadow: 0 4px 20px rgba(108,92,231,0.15);
+            transform: translateY(-2px);
+        }
+
+        .source-icon { font-size: 32px; line-height: 1; }
+
+        .source-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #2d3436;
+        }
+
+        .source-desc {
+            font-size: 12px;
+            color: #b2bec3;
+        }
+
+        .source-content {
+            animation: fadeUp 0.35s ease-out;
+        }
+
+        /* ---------- 动画 ---------- */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(108, 92, 231, 0.3); }
+            50% { box-shadow: 0 0 0 8px rgba(108, 92, 231, 0); }
+        }
+
+        /* ---------- 响应式 ---------- */
+        @media (max-width: 640px) {
+            .tab-content { padding: 16px 12px 32px; }
+
+            .card { padding: 18px 16px; border-radius: 14px; }
+            .plate-card { padding: 18px 16px; border-radius: 14px; }
+
+            .app-title h1 { font-size: 22px; }
+            .app-title p { font-size: 13px; }
+
+            .input-grid { grid-template-columns: 1fr; gap: 12px; }
+            .input-grid .span-full { grid-column: 1; }
+
+            .metrics { gap: 10px; }
+            .metric-item { padding: 12px 8px; }
+            .metric-item .value { font-size: 22px; }
+
+            .macro-table { font-size: 13px; }
+            .macro-table th, .macro-table td { padding: 8px 4px; }
+
+            .nav-btn { font-size: 14px; padding: 14px 10px; }
+
+            .food-cat-btn { padding: 6px 14px; font-size: 12px; }
+
+            .target-mode-bar { flex-direction: column; gap: 6px; }
+
+            .source-toggle { grid-template-columns: 1fr; }
+            .step-indicator { gap: 4px; }
+            .step-item { padding: 8px 14px; gap: 6px; }
+            .step-num { width: 26px; height: 26px; font-size: 12px; }
+            .step-label { font-size: 12px; }
+            .step-connector { width: 24px; }
+
+            .meal-grid { grid-template-columns: 1fr; }
+
+            .plate-option-btn { min-width: 60px; padding: 10px 12px; font-size: 13px; }
+
+            .plate-macro-detail { gap: 10px; }
+            .plate-macro-item { padding: 6px 12px; min-width: 70px; }
+            .plate-chart-wrap { max-width: 200px; }
+
+            .btn-generate { font-size: 16px; padding: 14px 0; }
+
+            .food-table { font-size: 12px; min-width: 400px; }
+            .food-table th, .food-table td { padding: 7px 6px; }
+            .food-search { font-size: 13px; padding: 8px 12px; }
+
+            .history-item-top { gap: 6px; }
+            .history-item-bmi { font-size: 14px; }
         }
 
         @media (max-width: 380px) {
-            .metrics {
-                grid-template-columns: 1fr;
-            }
+            .metrics { grid-template-columns: 1fr; }
+            .food-table { min-width: 320px; font-size: 11px; }
         }
     </style>
 </head>
@@ -1587,11 +1513,11 @@
 
     <!-- 输入卡片 -->
     <div class="card" id="inputCard">
-        <div class="input-group">
+        <div class="input-grid">
             <!-- 年龄 -->
             <div class="field">
                 <label for="age">年龄（岁）</label>
-                <input type="number" id="age" min="1" max="120" placeholder="例如 25" value="25">
+                <input type="number" id="age" min="1" max="120" placeholder="例如 25">
             </div>
             <!-- 性别 -->
             <div class="field">
@@ -1604,15 +1530,15 @@
             <!-- 身高 -->
             <div class="field">
                 <label for="height">身高（cm）</label>
-                <input type="number" id="height" min="50" max="250" step="0.1" placeholder="例如 170" value="165">
+                <input type="number" id="height" min="50" max="250" step="0.1" placeholder="例如 170">
             </div>
             <!-- 体重 -->
             <div class="field">
                 <label for="weight">体重（kg）</label>
-                <input type="number" id="weight" min="10" max="300" step="0.1" placeholder="例如 60" value="60">
+                <input type="number" id="weight" min="10" max="300" step="0.1" placeholder="例如 60">
             </div>
             <!-- 活动水平（全宽） -->
-            <div class="field full-width">
+            <div class="field span-full">
                 <label for="activity">活动水平</label>
                 <select id="activity">
                     <option value="1.2">几乎不动 — 久坐办公，很少运动</option>
@@ -1665,25 +1591,25 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td class="nutrient-name">
-                            <span class="ratio-bar carbs"></span>碳水化合物
+                        <td class="name-cell">
+                            <span class="ratio-dot carbs"></span>碳水化合物
                         </td>
-                        <td class="nutrient-range" id="carbsRange">—</td>
-                        <td class="nutrient-ratio" id="carbsRatio">—</td>
+                        <td class="range-cell" id="carbsRange">—</td>
+                        <td class="ratio-cell" id="carbsRatio">—</td>
                     </tr>
                     <tr>
-                        <td class="nutrient-name">
-                            <span class="ratio-bar protein"></span>蛋白质
+                        <td class="name-cell">
+                            <span class="ratio-dot protein"></span>蛋白质
                         </td>
-                        <td class="nutrient-range" id="proteinRange">—</td>
-                        <td class="nutrient-ratio" id="proteinRatio">—</td>
+                        <td class="range-cell" id="proteinRange">—</td>
+                        <td class="ratio-cell" id="proteinRatio">—</td>
                     </tr>
                     <tr>
-                        <td class="nutrient-name">
-                            <span class="ratio-bar fat"></span>脂肪
+                        <td class="name-cell">
+                            <span class="ratio-dot fat"></span>脂肪
                         </td>
-                        <td class="nutrient-range" id="fatRange">—</td>
-                        <td class="nutrient-ratio" id="fatRatio">—</td>
+                        <td class="range-cell" id="fatRange">—</td>
+                        <td class="ratio-cell" id="fatRatio">—</td>
                     </tr>
                 </tbody>
             </table>
@@ -1692,7 +1618,7 @@
         <!-- 供能比饼图 -->
         <div class="chart-section">
             <h3>三大营养素供能比例</h3>
-            <div class="chart-wrapper">
+            <div class="chart-wrap">
                 <canvas id="macroChart"></canvas>
             </div>
         </div>
@@ -1707,7 +1633,7 @@
     <!-- 公式说明（折叠） -->
     <details class="card formula-details">
         <summary class="formula-summary">Mifflin-St Jeor 公式原理</summary>
-        <div class="formula-content">
+        <div class="formula-body">
             <p><strong>Mifflin-St Jeor</strong> 是目前公认估算基础代谢率（BMR）最准确的公式之一，于 1990 年由 Mifflin 和 St Jeor 等人发表。它通过体重、身高、年龄和性别来预测人体在静息状态下维持生命所需的最低能量消耗。</p>
 
             <div class="formula-block">
@@ -1753,15 +1679,15 @@
     <div class="card" id="historyCard">
         <!-- BMI 趋势图 -->
         <div class="trend-section">
-            <h3>BMI 趋势 <span class="history-count" id="trendCount">0 条记录</span></h3>
+            <h3 class="section-title">BMI 趋势 <span class="badge" id="trendCount">0 条记录</span></h3>
             <div class="trend-chart-wrap">
                 <canvas id="trendChart"></canvas>
             </div>
             <div class="trend-empty" id="trendEmpty">暂无足够数据，计算 2 次以上即可显示趋势</div>
         </div>
 
-        <div class="history-header">
-            <h3>历史记录 <span class="history-count" id="historyCount">0</span></h3>
+        <div class="history-bar">
+            <h3 class="section-title">历史记录 <span class="badge" id="historyCount">0</span></h3>
             <button class="btn-clear-all" id="clearAllBtn">清空全部</button>
         </div>
         <div id="historyContainer">
@@ -1778,7 +1704,7 @@
         <p>智能搭配你的每一餐</p>
     </div>
 
-    <!-- 用户画像提示卡（默认隐藏，计算完成后显示） -->
+    <!-- 用户画像提示卡（默认隐藏） -->
     <div class="plate-card profile-card" id="profileCard" style="display:none;">
         <div class="profile-card-content">
             <span class="profile-icon">📋</span>
@@ -1789,57 +1715,99 @@
         </div>
     </div>
 
-    <!-- 输入区 -->
-    <div class="plate-card">
-        <!-- 问题1 -->
-        <div class="plate-question">
-            <div class="plate-question-label">你的目标是什么？</div>
-            <div class="plate-options" data-question="goal">
-                <button class="plate-option-btn" data-value="减重">减重</button>
-                <button class="plate-option-btn" data-value="增肌">增肌</button>
-                <button class="plate-option-btn" data-value="保持现状">保持现状</button>
-            </div>
-            <div class="plate-selected-hint" data-hint="goal">请选择</div>
+    <!-- ===== 步骤指示器 ===== -->
+    <div class="step-indicator">
+        <div class="step-item active" data-step="1">
+            <span class="step-num">1</span>
+            <span class="step-label">目标设定</span>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step-item" data-step="2">
+            <span class="step-num">2</span>
+            <span class="step-label">生成餐盘</span>
+        </div>
+    </div>
+
+    <!-- ===== 第一步：目标设定 ===== -->
+    <div class="plate-card step-panel" id="step1Panel">
+        <div class="panel-header">
+            <span class="panel-icon">🎯</span>
+            <span class="panel-title">选择你的营养目标</span>
         </div>
 
-        <!-- 问题2 -->
-        <div class="plate-question">
-            <div class="plate-question-label">哪一餐最容易凑合？</div>
-            <div class="plate-options" data-question="meal">
-                <button class="plate-option-btn" data-value="早餐">早餐</button>
-                <button class="plate-option-btn" data-value="午餐">午餐</button>
-                <button class="plate-option-btn" data-value="晚餐">晚餐</button>
-                <button class="plate-option-btn" data-value="都还行">都还行</button>
-            </div>
-            <div class="plate-selected-hint" data-hint="meal">请选择</div>
+        <!-- 数据来源切换 -->
+        <div class="source-toggle" id="sourceToggle">
+            <button class="source-btn active" data-source="system">
+                <span class="source-icon">📊</span>
+                <span class="source-title">系统推荐方案</span>
+                <span class="source-desc">基于你的身体数据和目标计算</span>
+            </button>
+            <button class="source-btn" data-source="custom">
+                <span class="source-icon">✏️</span>
+                <span class="source-title">自定义方案</span>
+                <span class="source-desc">手动输入你的营养素目标</span>
+            </button>
         </div>
 
-        <!-- 问题3 -->
-        <div class="plate-question">
-            <div class="plate-question-label">你的活动水平？</div>
-            <div class="plate-options" data-question="activity">
-                <button class="plate-option-btn" data-value="久坐为主">久坐为主</button>
-                <button class="plate-option-btn" data-value="偶尔运动">偶尔运动</button>
-                <button class="plate-option-btn" data-value="经常运动">经常运动</button>
+        <!-- 系统推荐模式 -->
+        <div class="source-content" id="systemContent">
+            <div class="plate-question">
+                <div class="plate-question-label">你的目标是什么？</div>
+                <div class="plate-options" data-question="goal">
+                    <button class="plate-option-btn" data-value="减重">减重</button>
+                    <button class="plate-option-btn" data-value="增肌">增肌</button>
+                    <button class="plate-option-btn" data-value="保持现状">保持现状</button>
+                </div>
+                <div class="plate-selected-hint" data-hint="goal">请选择</div>
             </div>
-            <div class="plate-selected-hint" data-hint="activity">请选择</div>
+            <div class="plate-question">
+                <div class="plate-question-label">你的活动水平？</div>
+                <div class="plate-options" data-question="activity">
+                    <button class="plate-option-btn" data-value="久坐为主">久坐为主</button>
+                    <button class="plate-option-btn" data-value="偶尔运动">偶尔运动</button>
+                    <button class="plate-option-btn" data-value="经常运动">经常运动</button>
+                </div>
+                <div class="plate-selected-hint" data-hint="activity">请选择</div>
+            </div>
         </div>
 
-        <!-- 快捷使用计算结果按钮（默认隐藏） -->
-        <button class="btn-quick-use" id="quickUseBtn" style="display:none;">⚡ 使用我的计算结果</button>
+        <!-- 自定义模式 -->
+        <div class="source-content" id="customContent" style="display:none;">
+            <div class="target-mode-bar" id="targetModeBar">
+                <button class="target-mode-btn active" data-mode="gram">按克数</button>
+                <button class="target-mode-btn" data-mode="pct">按百分比</button>
+                <button class="target-mode-btn" data-mode="perkg">按每公斤体重</button>
+            </div>
+            <div class="target-inputs">
+                <div class="target-row">
+                    <span class="target-label"><span class="target-dot carbs"></span>碳水化合物</span>
+                    <input type="number" class="target-input" id="targetCarbs" min="0" step="1" placeholder="克数">
+                    <span class="target-unit" id="carbsUnit">g</span>
+                </div>
+                <div class="target-row">
+                    <span class="target-label"><span class="target-dot protein"></span>蛋白质</span>
+                    <input type="number" class="target-input" id="targetProtein" min="0" step="1" placeholder="克数">
+                    <span class="target-unit" id="proteinUnit">g</span>
+                </div>
+                <div class="target-row">
+                    <span class="target-label"><span class="target-dot fat"></span>脂肪</span>
+                    <input type="number" class="target-input" id="targetFat" min="0" step="1" placeholder="克数">
+                    <span class="target-unit" id="fatUnit">g</span>
+                </div>
+            </div>
+        </div>
 
-        <!-- 摘要 -->
+        <!-- 目标摘要 -->
         <div class="plate-summary-bar" id="plateSummary">
-            请完成以上三个选择，然后点击下方按钮生成餐盘
+            请先设定营养目标，然后生成餐盘
         </div>
 
         <!-- 生成按钮 -->
-        <button class="btn-generate" id="generateBtn" disabled>生成我的餐盘</button>
+        <button class="btn-generate" id="generateBtn" disabled>生成餐盘</button>
     </div>
 
     <!-- 结果区 -->
     <div class="plate-result" id="plateResult">
-        <!-- 环形图 + 全天克数 -->
         <div class="plate-card plate-result-section">
             <h3>你的全天营养目标</h3>
             <div class="plate-chart-wrap">
@@ -1848,7 +1816,6 @@
             <div class="plate-macro-detail" id="plateMacroDetail"></div>
         </div>
 
-        <!-- 三餐卡片 -->
         <div class="meal-grid" id="mealGrid">
             <div class="meal-card" id="meal早餐">
                 <div class="meal-header">
@@ -1873,40 +1840,54 @@
             </div>
         </div>
 
-        <!-- 凑合餐替换建议 -->
         <div class="plate-card plate-result-section" id="swapSection">
             <h3>餐单替换建议</h3>
             <div id="plateSwapContainer"></div>
         </div>
 
-        <!-- 食物热量速查表（可折叠） -->
-        <details class="card food-details">
-            <summary class="food-summary">📊 食物热量速查表 <span class="food-count" id="foodCount">150</span></summary>
-            <div class="food-content">
-                <input type="text" class="food-search" id="foodSearch" placeholder="输入食物名称搜索..." autocomplete="off">
-                <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <!-- 食物热量速查表 -->
+        <div class="card food-section">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+                <div style="font-size:16px;font-weight:600;color:#2d3436;display:flex;align-items:center;gap:8px;">
+                    <span style="width:4px;height:16px;background:#6c5ce7;border-radius:2px;flex-shrink:0;"></span>
+                    食物热量速查表
+                    <span class="food-count" id="foodCount">150</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;">
                     <button class="fav-toggle" id="favToggleBtn">⭐ 只看收藏</button>
                     <span style="font-size:12px;color:#b2bec3;" id="favCount">0 个收藏</span>
                 </div>
-                <div class="food-table-wrap">
-                    <table class="food-table">
-                        <thead>
-                            <tr>
-                                <th style="width:32px;"></th>
-                                <th>分类</th>
-                                <th>食物名称</th>
-                                <th>热量<br><small>(kcal/100g)</small></th>
-                                <th>碳水(g)</th>
-                                <th>蛋白质(g)</th>
-                                <th>脂肪(g)</th>
-                            </tr>
-                        </thead>
-                        <tbody id="foodTableBody"></tbody>
-                    </table>
-                </div>
-                <div class="food-empty" id="foodEmpty">未找到匹配的食物</div>
             </div>
-        </details>
+
+            <div class="food-cat-bar" id="foodCatBar">
+                <button class="food-cat-btn active" data-cat="all">全部</button>
+                <button class="food-cat-btn" data-cat="staple">主食</button>
+                <button class="food-cat-btn" data-cat="meat">肉类</button>
+                <button class="food-cat-btn" data-cat="veg">蔬菜</button>
+                <button class="food-cat-btn" data-cat="fruit">水果</button>
+                <button class="food-cat-btn" data-cat="snack">零食饮品</button>
+            </div>
+
+            <input type="text" class="food-search" id="foodSearch" placeholder="搜索食物..." autocomplete="off">
+
+            <div class="food-table-wrap">
+                <table class="food-table">
+                    <thead>
+                        <tr>
+                            <th style="width:32px;"></th>
+                            <th>分类</th>
+                            <th>食物名称</th>
+                            <th>热量<br><small>(kcal/100g)</small></th>
+                            <th>碳水(g)</th>
+                            <th>蛋白质(g)</th>
+                            <th>脂肪(g)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="foodTableBody"></tbody>
+                </table>
+            </div>
+            <div class="food-empty" id="foodEmpty">未找到匹配的食物</div>
+        </div>
     </div>
 </div>
 
