@@ -61,6 +61,14 @@
             const ctx = document.getElementById('macroChart');
             if (!ctx) return;
 
+            // 检查 canvas 是否有实际尺寸（移动端修复）
+            if (ctx.offsetWidth === 0 || ctx.offsetHeight === 0) {
+                setTimeout(function() {
+                    updateMacroChart();
+                }, 300);
+                return;
+            }
+
             // 使用各营养素供能比范围的中点作为代表值，且三者之和为 100%
             // 碳水 45-65% → 取 50%，蛋白质 10-35% → 取 20%，脂肪 20-35% → 取 30%
             const data = [50, 20, 30];
@@ -923,9 +931,7 @@
             var sourceToggle = document.getElementById('sourceToggle');
             var systemContent = document.getElementById('systemContent');
             var customContent = document.getElementById('customContent');
-            var step1Panel = document.getElementById('step1Panel');
             var targetModeBar = document.getElementById('targetModeBar');
-            var stepIndicator = document.querySelector('.step-indicator');
 
             // 热量表（仅在无用户画像时使用）
             var CALORIE_TABLE = {
@@ -1056,15 +1062,21 @@
 
             // ===== 生成餐盘 =====
             if (generateBtn) {
+                // 移动端 touch 后浏览器会补发 click，用 _touchFired 标记避免双触发
                 generateBtn.addEventListener('click', function() {
                     if (this.disabled) return;
+                    if (this._touchFired) { this._touchFired = false; return; }
                     selections.meal = '午餐';
-                    if (stepIndicator) {
-                        stepIndicator.querySelectorAll('.step-item').forEach(function(s, i) {
-                            s.classList.toggle('active', i === 1);
-                        });
-                    }
                     generatePlate(!!window.userProfile);
+                });
+                generateBtn.addEventListener('touchend', function() {
+                    if (this.disabled) return;
+                    this._touchFired = true;
+                    selections.meal = '午餐';
+                    generatePlate(!!window.userProfile);
+                }, { passive: true });
+                generateBtn.addEventListener('touchcancel', function() {
+                    this._touchFired = false;
                 });
             }
 
@@ -1564,5 +1576,18 @@
             renderHistory();
             renderTrendChart();
             updateMacroChart();
+        });
+
+        // 窗口 resize 时重新渲染图表（移动端旋转屏幕等场景）
+        var _resizeTimer;
+        window.addEventListener('resize', function() {
+            clearTimeout(_resizeTimer);
+            _resizeTimer = setTimeout(function() {
+                renderTrendChart();
+                var bmiVal = document.getElementById('bmiValue').textContent;
+                if (bmiVal !== '—') {
+                    updateMacroChart();
+                }
+            }, 400);
         });
     })();

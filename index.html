@@ -848,6 +848,8 @@
             text-align: center;
             -webkit-tap-highlight-color: transparent;
             user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
         }
 
         .plate-option-btn:hover {
@@ -895,10 +897,14 @@
             font-weight: 700;
             font-family: inherit;
             cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
             letter-spacing: 1px;
             transition: transform 0.2s ease, box-shadow 0.25s ease;
             position: relative;
             overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .btn-generate::after {
@@ -1302,75 +1308,6 @@
             min-width: 28px;
         }
 
-        /* ---------- 步骤指示器 ---------- */
-        .step-indicator {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0;
-            margin-bottom: 24px;
-            padding: 0 16px;
-        }
-
-        .step-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 20px;
-            border-radius: 12px;
-            background: rgba(255,255,255,0.6);
-            transition: all 0.3s ease;
-        }
-
-        .step-item.active {
-            background: rgba(108,92,231,0.12);
-            transform: scale(1.02);
-        }
-
-        .step-item.active .step-num {
-            background: #6c5ce7;
-            color: #fff;
-            box-shadow: 0 2px 8px rgba(108,92,231,0.3);
-        }
-
-        .step-label {
-            font-size: 14px;
-            font-weight: 600;
-            color: #b2bec3;
-            transition: color 0.3s ease;
-        }
-
-        .step-item.active .step-label {
-            color: #6c5ce7;
-        }
-
-        .step-connector {
-            width: 40px;
-            height: 2px;
-            background: #dfe6e9;
-            margin: 0 4px;
-        }
-
-        /* ---------- 步骤面板 ---------- */
-        .step-panel { animation: fadeUp 0.4s ease-out; }
-
-        .panel-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 20px;
-            padding-bottom: 14px;
-            border-bottom: 2px solid #f0f1f3;
-        }
-
-        .panel-icon { font-size: 22px; line-height: 1; }
-
-        .panel-title {
-            font-size: 17px;
-            font-weight: 700;
-            color: #2d3436;
-        }
-
         /* ---------- 数据来源切换 ---------- */
         .source-toggle {
             display: grid;
@@ -1425,6 +1362,24 @@
             animation: fadeUp 0.35s ease-out;
         }
 
+        /* ---------- 面板头部 ---------- */
+        .panel-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding-bottom: 14px;
+            border-bottom: 2px solid #f0f1f3;
+        }
+
+        .panel-icon { font-size: 22px; line-height: 1; }
+
+        .panel-title {
+            font-size: 17px;
+            font-weight: 700;
+            color: #2d3436;
+        }
+
         /* ---------- 动画 ---------- */
         @keyframes fadeUp {
             from { opacity: 0; transform: translateY(20px); }
@@ -1463,11 +1418,6 @@
             .target-mode-bar { flex-direction: column; gap: 6px; }
 
             .source-toggle { grid-template-columns: 1fr; }
-            .step-indicator { gap: 4px; }
-            .step-item { padding: 8px 14px; gap: 6px; }
-            .step-num { width: 26px; height: 26px; font-size: 12px; }
-            .step-label { font-size: 12px; }
-            .step-connector { width: 24px; }
 
             .meal-grid { grid-template-columns: 1fr; }
 
@@ -1619,7 +1569,7 @@
         <div class="chart-section">
             <h3>三大营养素供能比例</h3>
             <div class="chart-wrap">
-                <canvas id="macroChart"></canvas>
+                <canvas id="macroChart" width="280" height="280"></canvas>
             </div>
         </div>
 
@@ -1681,7 +1631,7 @@
         <div class="trend-section">
             <h3 class="section-title">BMI 趋势 <span class="badge" id="trendCount">0 条记录</span></h3>
             <div class="trend-chart-wrap">
-                <canvas id="trendChart"></canvas>
+                <canvas id="trendChart" width="680" height="200"></canvas>
             </div>
             <div class="trend-empty" id="trendEmpty">暂无足够数据，计算 2 次以上即可显示趋势</div>
         </div>
@@ -1715,21 +1665,8 @@
         </div>
     </div>
 
-    <!-- ===== 步骤指示器 ===== -->
-    <div class="step-indicator">
-        <div class="step-item active" data-step="1">
-            <span class="step-num">1</span>
-            <span class="step-label">目标设定</span>
-        </div>
-        <div class="step-connector"></div>
-        <div class="step-item" data-step="2">
-            <span class="step-num">2</span>
-            <span class="step-label">生成餐盘</span>
-        </div>
-    </div>
-
-    <!-- ===== 第一步：目标设定 ===== -->
-    <div class="plate-card step-panel" id="step1Panel">
+    <!-- ===== 目标设定 ===== -->
+    <div class="plate-card" id="step1Panel">
         <div class="panel-header">
             <span class="panel-icon">🎯</span>
             <span class="panel-title">选择你的营养目标</span>
@@ -1811,7 +1748,7 @@
         <div class="plate-card plate-result-section">
             <h3>你的全天营养目标</h3>
             <div class="plate-chart-wrap">
-                <canvas id="plateChart"></canvas>
+                <canvas id="plateChart" width="260" height="260"></canvas>
             </div>
             <div class="plate-macro-detail" id="plateMacroDetail"></div>
         </div>
