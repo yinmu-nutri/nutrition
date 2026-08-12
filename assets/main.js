@@ -92,7 +92,7 @@
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: true,
+                    maintainAspectRatio: false,
                     cutout: '55%',
                     plugins: {
                         legend: {
@@ -1062,21 +1062,25 @@
 
             // ===== 生成餐盘 =====
             if (generateBtn) {
-                // 移动端 touch 后浏览器会补发 click，用 _touchFired 标记避免双触发
+                // 触发函数：统一在 click 和 touchstart 中复用
+                function triggerGenerate() {
+                    if (generateBtn.disabled) return;
+                    selections.meal = '午餐';
+                    generatePlate(!!window.userProfile);
+                }
                 generateBtn.addEventListener('click', function() {
-                    if (this.disabled) return;
+                    console.log('生成餐盘按钮被点击 (click)');
                     if (this._touchFired) { this._touchFired = false; return; }
-                    selections.meal = '午餐';
-                    generatePlate(!!window.userProfile);
+                    triggerGenerate();
                 });
-                generateBtn.addEventListener('touchend', function() {
-                    if (this.disabled) return;
-                    this._touchFired = true;
-                    selections.meal = '午餐';
-                    generatePlate(!!window.userProfile);
+                // 移动端 touchstart 立即响应，click 兜底；_touchFired 防双触发
+                generateBtn.addEventListener('touchstart', function() {
+                    if (generateBtn.disabled) return;
+                    generateBtn._touchFired = true;
+                    triggerGenerate();
                 }, { passive: true });
                 generateBtn.addEventListener('touchcancel', function() {
-                    this._touchFired = false;
+                    generateBtn._touchFired = false;
                 });
             }
 
