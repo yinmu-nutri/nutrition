@@ -1188,6 +1188,186 @@
             border-color: #00b894;
         }
 
+        /* ---------- 分享卡片按钮 ---------- */
+        .btn-share {
+            width: 100%;
+            padding: 12px 0;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
+            color: #fff;
+            font-size: 15px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+            transition: all 0.25s ease;
+            margin-top: 16px;
+        }
+
+        .btn-share:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(108, 92, 231, 0.35);
+        }
+
+        .btn-share:active { transform: translateY(0); }
+
+        /* ---------- 分享卡片弹窗 ---------- */
+        .share-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.55);
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .share-modal.visible { display: flex; }
+
+        .share-modal-content {
+            width: 100%;
+            max-width: 460px;
+            max-height: 92vh;
+            background: #fff;
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+        }
+
+        .share-modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .share-modal-title {
+            font-weight: 700;
+            font-size: 16px;
+            color: #2d3436;
+        }
+
+        .share-modal-close {
+            min-width: 36px;
+            height: 36px;
+            border: none;
+            background: #f1f2f6;
+            border-radius: 8px;
+            font-size: 16px;
+            color: #636e72;
+            cursor: pointer;
+        }
+
+        .share-modal-hint {
+            font-size: 12px;
+            color: #b2bec3;
+        }
+
+        .share-card-scroll {
+            overflow: auto;
+            border-radius: 12px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .share-card-img {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .btn-share-save {
+            width: 100%;
+            padding: 12px 0;
+            border: none;
+            border-radius: 12px;
+            background: #00b894;
+            color: #fff;
+            font-size: 15px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            transition: background 0.25s ease;
+        }
+
+        .btn-share-save:hover { background: #00a381; }
+
+        /* ---------- 导出报告弹窗 ---------- */
+        .report-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 999;
+            background: rgba(0, 0, 0, 0.45);
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .report-modal.visible { display: flex; }
+
+        .report-modal-content {
+            width: 100%;
+            max-width: 420px;
+            max-height: 80vh;
+            background: #fff;
+            border-radius: 16px;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .report-modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .report-modal-title {
+            font-weight: 700;
+            font-size: 16px;
+            color: #2d3436;
+        }
+
+        .report-modal-close {
+            min-width: 36px;
+            height: 36px;
+            border: none;
+            background: #f1f2f6;
+            border-radius: 8px;
+            font-size: 16px;
+            color: #636e72;
+            cursor: pointer;
+        }
+
+        .report-modal-hint { font-size: 12px; color: #b2bec3; }
+
+        .report-modal-text {
+            width: 100%;
+            min-height: 220px;
+            max-height: 55vh;
+            border: 1px solid #f0f1f3;
+            border-radius: 10px;
+            padding: 12px;
+            font-size: 13px;
+            line-height: 1.6;
+            font-family: inherit;
+            color: #2d3436;
+            background: #fafafa;
+            resize: none;
+            -webkit-user-select: text;
+            user-select: text;
+        }
+
         /* ---------- 自定义营养素目标 ---------- */
         .target-header {
             display: flex;
@@ -1583,8 +1763,38 @@
         <!-- 建议 -->
         <div class="advice-box" id="adviceBox"></div>
 
+        <!-- 分享卡片按钮 -->
+        <button class="btn-share" id="shareBtn">🖼️ 生成分享卡片</button>
+
         <!-- 导出按钮 -->
         <button class="btn-export" id="exportBtn">📋 一键导出营养报告</button>
+    </div>
+
+    <!-- 导出报告弹窗（剪贴板 API 在容器内禁用，改为展示可选中文本） -->
+    <div class="report-modal" id="reportModal">
+        <div class="report-modal-content">
+            <div class="report-modal-header">
+                <span class="report-modal-title">📄 营养报告</span>
+                <button class="report-modal-close" id="reportModalClose" type="button">✕</button>
+            </div>
+            <p class="report-modal-hint">长按下方文本即可选中复制</p>
+            <textarea class="report-modal-text" id="reportModalText" readonly></textarea>
+        </div>
+    </div>
+
+    <!-- 分享卡片弹窗（图片可保存/截图，容器内下载被拦截时用长按截图） -->
+    <div class="share-modal" id="shareModal">
+        <div class="share-modal-content">
+            <div class="share-modal-header">
+                <span class="share-modal-title">🖼️ 你的专属营养报告卡</span>
+                <button class="share-modal-close" id="shareModalClose" type="button">✕</button>
+            </div>
+            <p class="share-modal-hint">长按图片保存，或直接截图分享到朋友圈 / 小红书</p>
+            <div class="share-card-scroll">
+                <img class="share-card-img" id="shareCardImg" alt="营养报告分享卡">
+            </div>
+            <button class="btn-share-save" id="shareSaveBtn">💾 保存图片</button>
+        </div>
     </div>
 
     <!-- 公式说明（折叠） -->

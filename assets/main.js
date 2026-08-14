@@ -708,45 +708,270 @@
 
             var report = generateReport();
 
-            // 复制到剪贴板
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(report).then(function() {
-                    var btn = document.getElementById('exportBtn');
-                    btn.textContent = '✅ 已复制到剪贴板！';
-                    btn.classList.add('copied');
-                    setTimeout(function() {
-                        btn.textContent = '📋 一键导出营养报告';
-                        btn.classList.remove('copied');
-                    }, 2500);
-                }).catch(function() {
-                    fallbackCopy(report);
-                });
-            } else {
-                fallbackCopy(report);
+            // 容器内剪贴板 API 不可用：改为弹窗展示可选中文本，引导长按复制
+            document.getElementById('reportModalText').value = report;
+            document.getElementById('reportModal').classList.add('visible');
+        });
+
+        var reportModal = document.getElementById('reportModal');
+        document.getElementById('reportModalClose').addEventListener('click', function() {
+            reportModal.classList.remove('visible');
+        });
+        reportModal.addEventListener('click', function(e) {
+            if (e.target === reportModal) reportModal.classList.remove('visible');
+        });
+
+// ===== 分享卡片生成 =====
+
+        var EVAL_STYLE = {
+            '偏瘦': '#fdcb6e',
+            '正常': '#00b894',
+            '超重': '#e17055',
+            '肥胖': '#d63031'
+        };
+
+        var SUB_TEXT = {
+            '偏瘦': '建议适当增加营养摄入',
+            '正常': '继续保持良好的生活习惯',
+            '超重': '建议控制饮食并增加运动',
+            '肥胖': '建议咨询专业人士制定减重计划'
+        };
+
+        var MACRO_ROWS = [
+            { name: '碳水化合物', key: 'carbs',   color: '#f6c453' },
+            { name: '蛋白质',     key: 'protein', color: '#e0e0ff' },
+            { name: '脂肪',       key: 'fat',     color: '#ff8a65' }
+        ];
+
+        function roundRectPath(ctx, x, y, w, h, r) {
+            ctx.beginPath();
+            ctx.moveTo(x + r, y);
+            ctx.arcTo(x + w, y, x + w, y + h, r);
+            ctx.arcTo(x + w, y + h, x, y + h, r);
+            ctx.arcTo(x, y + h, x, y, r);
+            ctx.arcTo(x, y, x + w, y, r);
+            ctx.closePath();
+        }
+
+        function parseRangeText(text) {
+            var m = String(text).match(/([\d.]+)\s*~\s*([\d.]+)/);
+            return m ? [m[1], m[2]] : ['—', '—'];
+        }
+
+        var CARD_FONT = '"PingFang SC","Microsoft YaHei",sans-serif';
+
+        /** 绘制 1080×1440 营养报告分享卡，返回 dataURL */
+        function drawShareCard() {
+            var W = 1080, H = 1440;
+            var canvas = document.createElement('canvas');
+            canvas.width = W;
+            canvas.height = H;
+            var ctx = canvas.getContext('2d');
+
+            var p = window.userProfile || {};
+            var bmi = p.bmi != null ? p.bmi : document.getElementById('bmiValue').textContent;
+            var bmiEval = p.bmiEval || document.getElementById('bmiEval').textContent || '正常';
+            var bmr = p.bmr != null ? p.bmr : document.getElementById('bmrValue').textContent;
+            var tdee = p.tdee != null ? p.tdee : document.getElementById('tdeeValue').textContent;
+            var age = p.age || document.getElementById('age').value;
+            var gender = ((p.gender || document.getElementById('gender').value) === 'male') ? '男' : '女';
+            var height = p.height || document.getElementById('height').value;
+            var weight = p.weight || document.getElementById('weight').value;
+
+            var carbsRange   = p.carbsRange   || parseRangeText(document.getElementById('carbsRange').textContent);
+            var proteinRange = p.proteinRange || parseRangeText(document.getElementById('proteinRange').textContent);
+            var fatRange     = p.fatRange     || parseRangeText(document.getElementById('fatRange').textContent);
+
+            var subText = SUB_TEXT[bmiEval] || SUB_TEXT['正常'];
+
+            // --- 背景渐变 ---
+            var grad = ctx.createLinearGradient(0, 0, 0, H);
+            grad.addColorStop(0, '#6c5ce7');
+            grad.addColorStop(0.55, '#7f6fe0');
+            grad.addColorStop(1, '#a29bfe');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, W, H);
+
+            // --- 装饰圆 ---
+            ctx.fillStyle = 'rgba(255,255,255,0.07)';
+            ctx.beginPath(); ctx.arc(940, 150, 190, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(120, 1330, 210, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(60, 460, 90, 0, Math.PI * 2); ctx.fill();
+
+            ctx.textAlign = 'center';
+
+            // --- 头部 ---
+            ctx.fillStyle = 'rgba(255,255,255,0.7)';
+            ctx.font = '30px ' + CARD_FONT;
+            ctx.fillText('我的营养报告', W / 2, 96);
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '700 66px ' + CARD_FONT;
+            ctx.fillText('营养计算器', W / 2, 172);
+
+            ctx.fillStyle = 'rgba(255,255,255,0.75)';
+            ctx.font = '28px ' + CARD_FONT;
+            ctx.fillText('科学计算你的身体指标与营养需求', W / 2, 224);
+
+            ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(W / 2 - 180, 258);
+            ctx.lineTo(W / 2 + 180, 258);
+            ctx.stroke();
+
+            // --- BMI 主数字 ---
+            ctx.fillStyle = 'rgba(255,255,255,0.6)';
+            ctx.font = '28px ' + CARD_FONT;
+            ctx.fillText('BMI 身体质量指数', W / 2, 330);
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '900 150px ' + CARD_FONT;
+            ctx.fillText(String(bmi), W / 2, 452);
+
+            // 评价徽章
+            var badgeColor = EVAL_STYLE[bmiEval] || '#00b894';
+            ctx.font = '700 34px ' + CARD_FONT;
+            var bw = ctx.measureText(bmiEval).width + 52;
+            var bx = W / 2 - bw / 2, by = 492, bh = 64;
+            ctx.fillStyle = badgeColor;
+            roundRectPath(ctx, bx, by, bw, bh, 32);
+            ctx.fill();
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText(bmiEval, W / 2, by + 44);
+
+            // 评价副文案
+            ctx.fillStyle = 'rgba(255,255,255,0.75)';
+            ctx.font = '30px ' + CARD_FONT;
+            ctx.fillText(subText, W / 2, 610);
+
+            // --- 两个指标盒 ---
+            var boxY = 668, boxH = 168, boxW = 455, boxGap = 30;
+            var boxes = [
+                { label: '基础代谢 BMR', value: bmr + ' kcal/天' },
+                { label: '每日总能耗 TDEE', value: tdee + ' kcal/天' }
+            ];
+            boxes.forEach(function(b, i) {
+                var bx2 = 70 + i * (boxW + boxGap);
+                ctx.fillStyle = 'rgba(255,255,255,0.16)';
+                roundRectPath(ctx, bx2, boxY, boxW, boxH, 28);
+                ctx.fill();
+                ctx.fillStyle = 'rgba(255,255,255,0.75)';
+                ctx.font = '28px ' + CARD_FONT;
+                ctx.fillText(b.label, bx2 + boxW / 2, boxY + 58);
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '700 40px ' + CARD_FONT;
+                ctx.fillText(b.value, bx2 + boxW / 2, boxY + 118);
+            });
+
+            // --- 营养素建议 ---
+            ctx.fillStyle = 'rgba(255,255,255,0.9)';
+            ctx.font = '700 36px ' + CARD_FONT;
+            ctx.fillText('每日营养素建议', W / 2, 908);
+
+            var rowX = 70, rowW = 630, rowH = 78, rowGap = 16;
+            MACRO_ROWS.forEach(function(row, i) {
+                var range = (row.key === 'carbs') ? carbsRange
+                    : (row.key === 'protein') ? proteinRange : fatRange;
+                var ry = 940 + i * (rowH + rowGap);
+
+                ctx.fillStyle = 'rgba(255,255,255,0.14)';
+                roundRectPath(ctx, rowX, ry, rowW, rowH, 39);
+                ctx.fill();
+
+                ctx.fillStyle = row.color;
+                ctx.beginPath();
+                ctx.arc(rowX + 46, ry + rowH / 2, 13, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.textAlign = 'left';
+                ctx.fillStyle = 'rgba(255,255,255,0.9)';
+                ctx.font = '600 30px ' + CARD_FONT;
+                ctx.fillText(row.name, rowX + 76, ry + 51);
+
+                ctx.textAlign = 'right';
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '700 32px ' + CARD_FONT;
+                ctx.fillText(range[0] + ' ~ ' + range[1] + ' g', rowX + rowW - 26, ry + 51);
+            });
+            ctx.textAlign = 'center';
+
+            // --- 供能比环形图 ---
+            var dCx = 850, dCy = 1084, dR = 100, ringW = 34;
+            ctx.fillStyle = 'rgba(255,255,255,0.10)';
+            roundRectPath(ctx, dCx - 128, dCy - 128, 256, 256, 36);
+            ctx.fill();
+
+            var dData = [
+                { val: 50, color: '#f6c453' },
+                { val: 20, color: '#e0e0ff' },
+                { val: 30, color: '#ff8a65' }
+            ];
+            var startA = -Math.PI / 2;
+            dData.forEach(function(d) {
+                var sweep = (d.val / 100) * Math.PI * 2;
+                ctx.strokeStyle = d.color;
+                ctx.lineWidth = ringW;
+                ctx.lineCap = 'butt';
+                ctx.beginPath();
+                ctx.arc(dCx, dCy, dR - ringW / 2, startA, startA + sweep);
+                ctx.stroke();
+                startA += sweep;
+            });
+
+            ctx.fillStyle = 'rgba(255,255,255,0.9)';
+            ctx.font = '700 32px ' + CARD_FONT;
+            ctx.fillText('供能比', dCx, dCy - 2);
+
+            // --- 底部信息 ---
+            ctx.fillStyle = 'rgba(255,255,255,0.5)';
+            ctx.font = '26px ' + CARD_FONT;
+            ctx.fillText(gender + ' · ' + age + '岁 · ' + height + 'cm · ' + weight + 'kg', W / 2, 1300);
+
+            ctx.fillStyle = 'rgba(255,255,255,0.6)';
+            ctx.font = '30px ' + CARD_FONT;
+            ctx.fillText('由 营养计算器 生成 · 完全免费', W / 2, 1345);
+
+            ctx.fillStyle = 'rgba(255,255,255,0.45)';
+            ctx.font = '26px ' + CARD_FONT;
+            ctx.fillText('yinmu-nutri.github.io/nutrition', W / 2, 1392);
+
+            return canvas.toDataURL('image/png');
+        }
+
+        document.getElementById('shareBtn').addEventListener('click', function() {
+            var bmiVal = document.getElementById('bmiValue').textContent;
+            if (bmiVal === '—') {
+                alert('请先计算营养指标再生成分享卡片');
+                return;
+            }
+            document.getElementById('shareCardImg').src = drawShareCard();
+            document.getElementById('shareModal').classList.add('visible');
+        });
+
+        document.getElementById('shareSaveBtn').addEventListener('click', function() {
+            var img = document.getElementById('shareCardImg');
+            if (!img || !img.src) return;
+            try {
+                var a = document.createElement('a');
+                a.href = img.src;
+                a.download = '营养报告分享卡.png';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            } catch (e) {
+                // 容器内下载可能被拦截：提示直接长按/截图保存
+                alert('若未开始下载，请长按图片或截图保存');
             }
         });
 
-        function fallbackCopy(text) {
-            var ta = document.createElement('textarea');
-            ta.value = text;
-            ta.style.position = 'fixed';
-            ta.style.opacity = '0';
-            document.body.appendChild(ta);
-            ta.select();
-            try {
-                document.execCommand('copy');
-                var btn = document.getElementById('exportBtn');
-                btn.textContent = '✅ 已复制到剪贴板！';
-                btn.classList.add('copied');
-                setTimeout(function() {
-                    btn.textContent = '📋 一键导出营养报告';
-                    btn.classList.remove('copied');
-                }, 2500);
-            } catch (e) {
-                alert('复制失败，请手动复制');
-            }
-            document.body.removeChild(ta);
-        }
+        var shareModal = document.getElementById('shareModal');
+        document.getElementById('shareModalClose').addEventListener('click', function() {
+            shareModal.classList.remove('visible');
+        });
+        shareModal.addEventListener('click', function(e) {
+            if (e.target === shareModal) shareModal.classList.remove('visible');
+        });
 
 // ===== 食物热量速查表 =====
 
