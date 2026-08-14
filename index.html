@@ -41,6 +41,7 @@
             position: sticky;
             top: 0;
             z-index: 100;
+            padding-top: var(--safe-area-inset-top, env(safe-area-inset-top, 0px));
         }
 
         .nav-inner {
@@ -96,7 +97,7 @@
         .tab-content {
             max-width: 680px;
             margin: 0 auto;
-            padding: 24px 16px 48px;
+            padding: 24px 16px calc(48px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
         }
 
         /* ---------- 标题 ---------- */
@@ -1283,22 +1284,6 @@
             user-select: none;
         }
 
-        .btn-share-save {
-            width: 100%;
-            padding: 12px 0;
-            border: none;
-            border-radius: 12px;
-            background: #00b894;
-            color: #fff;
-            font-size: 15px;
-            font-weight: 700;
-            font-family: inherit;
-            cursor: pointer;
-            transition: background 0.25s ease;
-        }
-
-        .btn-share-save:hover { background: #00a381; }
-
         /* ---------- 导出报告弹窗 ---------- */
         .report-modal {
             display: none;
@@ -1580,7 +1565,7 @@
 
         /* ---------- 响应式 ---------- */
         @media (max-width: 640px) {
-            .tab-content { padding: 16px 12px 32px; }
+            .tab-content { padding: 16px 12px calc(32px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px))); }
 
             .card { padding: 18px 16px; border-radius: 14px; }
             .plate-card { padding: 18px 16px; border-radius: 14px; }
@@ -1789,11 +1774,10 @@
                 <span class="share-modal-title">🖼️ 你的专属营养报告卡</span>
                 <button class="share-modal-close" id="shareModalClose" type="button">✕</button>
             </div>
-            <p class="share-modal-hint">长按图片保存，或直接截图分享到朋友圈 / 小红书</p>
+            <p class="share-modal-hint">直接截图保存这张卡片，分享到朋友圈 / 小红书</p>
             <div class="share-card-scroll">
                 <img class="share-card-img" id="shareCardImg" alt="营养报告分享卡">
             </div>
-            <button class="btn-share-save" id="shareSaveBtn">💾 保存图片</button>
         </div>
     </div>
 

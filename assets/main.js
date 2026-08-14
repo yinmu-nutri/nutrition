@@ -949,22 +949,6 @@
             document.getElementById('shareModal').classList.add('visible');
         });
 
-        document.getElementById('shareSaveBtn').addEventListener('click', function() {
-            var img = document.getElementById('shareCardImg');
-            if (!img || !img.src) return;
-            try {
-                var a = document.createElement('a');
-                a.href = img.src;
-                a.download = '营养报告分享卡.png';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-            } catch (e) {
-                // 容器内下载可能被拦截：提示直接长按/截图保存
-                alert('若未开始下载，请长按图片或截图保存');
-            }
-        });
-
         var shareModal = document.getElementById('shareModal');
         document.getElementById('shareModalClose').addEventListener('click', function() {
             shareModal.classList.remove('visible');
