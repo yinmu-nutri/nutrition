@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1F6F78">
+<meta name="description" content="酮行 · 生酮患者管理台：筛查、方案、随访、报告。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231F6F78'/%3E%3Ctext x='32' y='44' font-size='34' text-anchor='middle' fill='white' font-family='Microsoft YaHei'%3E%E9%85%AE%3C/text%3E%3C/svg%3E">
+<title>酮行 · 生酮患者管理台</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header class="topbar no-print">
+  <div class="brand">
+    <div class="logo">酮</div>
+    <div>
+      <div class="brand-name">酮行</div>
+      <div class="brand-sub">生酮患者管理台</div>
+    </div>
+  </div>
+  <div class="top-actions">
+    <select id="patient-select" aria-label="选择患者"></select>
+    <button id="btn-new" class="btn ghost small">新建</button>
+    <button id="btn-demo-a" class="btn ghost small">案例 A</button>
+    <button id="btn-demo-b" class="btn ghost small">案例 B</button>
+  </div>
+</header>
+
+<nav class="stepbar no-print" id="stepbar">
+  <button class="step active" data-tab="patient"><span class="n">1</span>患者</button>
+  <button class="step" data-tab="screening"><span class="n">2</span>筛查</button>
+  <button class="step" data-tab="plan"><span class="n">3</span>方案</button>
+  <button class="step" data-tab="food"><span class="n">4</span>食物</button>
+  <button class="step" data-tab="followup"><span class="n">5</span>随访</button>
+  <button class="step" data-tab="report"><span class="n">6</span>报告</button>
+</nav>
+
+<main>
+
+  <!-- ========== 患者 ========== -->
+  <section id="tab-patient" class="tab active">
+    <div class="page-head">
+      <div>
+        <div class="kicker">STEP 01</div>
+        <h1>患者信息</h1>
+        <p class="sub">先建档。后面的筛查、方案、随访都挂在这个患者身上。</p>
+      </div>
+      <div id="patient-badge" class="badge gray">未建档</div>
+    </div>
+
+    <div class="card">
+      <div class="form-grid">
+        <label>姓名 / 编号<input id="p-name" placeholder="如：小林 / A-001"></label>
+        <label>类型
+          <select id="p-type">
+            <option value="child">儿童癫痫</option>
+            <option value="adult">成人超重 / 肥胖</option>
+          </select>
+        </label>
+        <label>年龄<input id="p-age" type="number" min="0" max="120" placeholder="岁"></label>
+        <label>性别
+          <select id="p-sex">
+            <option value="male">男</option>
+            <option value="female">女</option>
+          </select>
+        </label>
+        <label>身高（cm）<input id="p-height" type="number" step="0.1" placeholder="cm"></label>
+        <label>体重（kg）<input id="p-weight" type="number" step="0.1" placeholder="kg"></label>
+        <label>诊断 / 主要问题<input id="p-diagnosis" placeholder="如：难治性癫痫 / 超重伴脂肪肝"></label>
+        <label>用药 / 合并症<input id="p-meds" placeholder="如：丙戊酸；高血压"></label>
+        <label id="wrap-caregiver">主要照护者<input id="p-caregiver" placeholder="如：妈妈"></label>
+        <label id="wrap-goal">减重目标<input id="p-goal" placeholder="如：3 个月减 8%"></label>
+      </div>
+      <div class="form-actions">
+        <button id="btn-save-patient" class="btn primary">保存患者</button>
+        <button id="btn-clear-patient" class="btn ghost">清空表单</button>
+      </div>
+    </div>
+
+    <div class="card soft">
+      <h2>演示数据</h2>
+      <p class="hint">面试时一键载入，直接走完筛查、方案、随访、报告。</p>
+      <div class="inline-actions">
+        <button id="btn-load-a" class="btn ghost">载入案例 A：6 岁癫痫患儿</button>
+        <button id="btn-load-b" class="btn ghost">载入案例 B：35 岁超重女性</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 筛查 ========== -->
+  <section id="tab-screening" class="tab">
+    <div class="page-head">
+      <div>
+        <div class="kicker">STEP 02</div>
+        <h1>启动前筛查</h1>
+        <p class="sub">先排禁忌，再谈方案。勾选后自动给出结论。</p>
+      </div>
+      <div id="screen-badge" class="badge gray">未筛查</div>
+    </div>
+
+    <div class="card">
+      <h2 class="danger-title">绝对禁忌</h2>
+      <p class="hint">勾选任意一项，不建议启动生酮，需专科评估。</p>
+      <div id="abs-list" class="check-list"></div>
+    </div>
+
+    <div class="card">
+      <h2 class="warn-title">相对禁忌 / 慎用</h2>
+      <p class="hint">需要进一步评估和监测，不代表绝对不能做。</p>
+      <div id="rel-list" class="check-list"></div>
+    </div>
+
+    <div class="card">
+      <label>筛查备注
+        <textarea id="screen-notes" rows="3" placeholder="如：家族史、既往胰腺炎、肾结石、依从性评估……"></textarea>
+      </label>
+    </div>
+
+    <div id="screen-result" class="result-card gray"></div>
+
+    <div class="form-actions">
+      <button id="btn-confirm-screen" class="btn primary">确认筛查结论</button>
+    </div>
+  </section>
+
+  <!-- ========== 方案 ========== -->
+  <section id="tab-plan" class="tab">
+    <div class="page-head">
+      <div>
+        <div class="kicker">STEP 03</div>
+        <h1>方案计算</h1>
+        <p class="sub">输入目标能量、蛋白和比例，自动换算三大营养素和餐次分配。</p>
+      </div>
+      <div id="plan-badge" class="badge gray">未生成</div>
+    </div>
+
+    <div class="card">
+      <div class="form-grid">
+        <label>目标能量（kcal）<input id="pl-energy" type="number" step="10" placeholder="如：1400"></label>
+        <label>蛋白质（g/kg）<input id="pl-protein" type="number" step="0.1" placeholder="儿童 1.0–1.5；成人 1.2–1.6"></label>
+        <label>比例
+          <select id="pl-ratio">
+            <option value="3:1">3:1 经典生酮</option>
+            <option value="4:1">4:1 经典生酮</option>
+            <option value="MAD">MAD / 低碳</option>
+          </select>
+        </label>
+        <label>碳水上限（g，仅 MAD）<input id="pl-carb" type="number" step="1" placeholder="如：20–30"></label>
+        <label>餐次
+          <select id="pl-meals">
+            <option value="3">3 餐</option>
+            <option value="4">3 餐 + 1 加餐</option>
+          </select>
+        </label>
+        <label>&nbsp;<button id="btn-estimate" class="btn ghost full">按体重估算能量</button></label>
+      </div>
+      <p class="hint">儿童癫痫常用 3:1–4:1；成人减重常用 MAD。能量和蛋白是参考值，需医生 / 临床营养师确认。</p>
+      <div class="form-actions">
+        <button id="btn-generate" class="btn primary">生成方案</button>
+        <span id="plan-hint" class="hint"></span>
+      </div>
+    </div>
+
+    <div id="plan-output"></div>
+  </section>
+
+  <!-- ========== 食物 ========== -->
+  <section id="tab-food" class="tab">
+    <div class="page-head">
+      <div>
+        <div class="kicker">STEP 04</div>
+        <h1>食物参考</h1>
+        <p class="sub">查碳水、看隐形碳水；数值为约数，按实际称重和营养标签为准。</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <label>搜索食物<input id="food-search" placeholder="如：米饭、牛奶、番茄酱"></label>
+      <div class="inline-actions" style="margin-top:10px;">
+        <button class="btn ghost small food-cat active" data-food-cat="all">全部</button>
+        <button class="btn ghost small food-cat" data-food-cat="主食">主食</button>
+        <button class="btn ghost small food-cat" data-food-cat="蔬菜">蔬菜</button>
+        <button class="btn ghost small food-cat" data-food-cat="水果">水果</button>
+        <button class="btn ghost small food-cat" data-food-cat="肉蛋豆">肉蛋豆</button>
+        <button class="btn ghost small food-cat" data-food-cat="奶制品">奶制品</button>
+        <button class="btn ghost small food-cat" data-food-cat="油脂坚果">油脂坚果</button>
+        <button class="btn ghost small food-cat" data-food-cat="调味零食">调味零食</button>
+      </div>
+      <div id="food-table" class="table-wrap" style="margin-top:14px;"></div>
+      <p class="hint" style="margin-top:10px;">碳水为总碳水（约值），膳食纤维未扣；以净碳水计算时需另扣纤维。隐形碳水重点：酱料、零食、含糖饮料、糖浆类药物。</p>
+    </div>
+  </section>
+
+  <!-- ========== 随访 ========== -->
+  <section id="tab-followup" class="tab">
+    <div class="page-head">
+      <div>
+        <div class="kicker">STEP 05</div>
+        <h1>随访记录</h1>
+        <p class="sub">每次复诊记一笔，趋势和红黄绿灯会自动更新。</p>
+      </div>
+      <div id="follow-badge" class="badge gray">未记录</div>
+    </div>
+
+    <div class="card">
+      <div class="form-grid">
+        <label>日期<input id="f-date" type="date"></label>
+        <label>体重（kg）<input id="f-weight" type="number" step="0.1"></label>
+        <label>血酮（mmol/L）<input id="f-ketone" type="number" step="0.1"></label>
+        <label>血糖<input id="f-glucose" type="number" step="0.1"></label>
+        <label id="wrap-seizures">发作次数 / 周<input id="f-seizures" type="number" step="1"></label>
+        <label>依从性
+          <select id="f-adherence">
+            <option value="5">5 很好</option>
+            <option value="4">4 较好</option>
+            <option value="3">3 一般</option>
+            <option value="2">2 较差</option>
+            <option value="1">1 很差</option>
+          </select>
+        </label>
+      </div>
+      <div class="field-block">
+        <div class="field-label">不良反应</div>
+        <div id="adverse-list" class="check-list inline"></div>
+      </div>
+      <label>备注<textarea id="f-notes" rows="2" placeholder="如：便秘、外食多、学校午餐已自带……"></textarea></label>
+      <div class="form-actions">
+        <button id="btn-add-follow" class="btn primary">添加记录</button>
+      </div>
+    </div>
+
+    <div id="follow-status" class="result-card gray"></div>
+
+    <div class="card">
+      <div class="card-head">
+        <h2>趋势</h2>
+        <select id="chart-metric">
+          <option value="weight">体重</option>
+          <option value="ketone">血酮</option>
+          <option value="seizures">发作次数</option>
+          <option value="adherence">依从性</option>
+        </select>
+      </div>
+      <div id="chart" class="chart"></div>
+    </div>
+
+    <div class="card">
+      <h2>记录</h2>
+      <div id="follow-table" class="table-wrap"></div>
+    </div>
+  </section>
+
+  <!-- ========== 报告 ========== -->
+  <section id="tab-report" class="tab">
+    <div class="page-head no-print">
+      <div>
+        <div class="kicker">STEP 06</div>
+        <h1>报告</h1>
+        <p class="sub">医生版看数据，家长版说人话；可直接打印或存 PDF。</p>
+      </div>
+    </div>
+
+    <div class="report-controls no-print">
+      <button class="btn primary" data-report="doctor">医生版</button>
+      <button class="btn ghost" data-report="parent">家长 / 患者版</button>
+      <button id="btn-print" class="btn ghost">打印 / 存 PDF</button>
+    </div>
+
+    <div id="report-preview" class="report-preview"></div>
+  </section>
+
+</main>
+
+<div id="toast" class="toast"></div>
+
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>
